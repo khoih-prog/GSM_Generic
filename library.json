@@ -1,0 +1,38 @@
+{
+  "name":"GSM_Generic",
+  "version": "1.2.4",
+  "description":"Enables GSM/GRPS network connection using the GSM/GPRS modules. Use this library to make/receive voice calls, to send and receive SMS using Generic GSM/GPRS modules, such as u-blox SARA-U201 module.This library also allows you to connect to internet through the GPRS networks. You can either use Web Clients and Servers.",
+  "keywords":"gsm, gprs, udp, tcp, http, https, webclient, webserver, location, esp8266, esp32, esp32-s2, stm32, samd, sam-due, nrf52, ublox, sara, lisa, sim800, sim900, SIM800A, SIM800C, SIM800L, SIM800H, SIM808, SIM868, SIM900A, SIM900D, SIM908, SIM968, SIM7000, A6, A7, M590, M95, MC60, MC60E, BG96, u-blox, ublox, Quectel, SIMCOM, AI-Thinker, LTE, LTE-M, at-commands, AT",
+  "authors": 
+  [
+    {
+      "name": "Arduino",
+      "url":   "https://www.arduino.cc"
+    },
+    {
+      "name":  "Khoi Hoang",
+      "url":   "https://github.com/khoih-prog",
+      "email": "khoih.prog@gmail.com",
+      "maintainer": true
+    },
+    {
+      "name":  "Miguel Wisintainer",
+      "url":   "https://github.com/tcpipchip",
+      "email": "tcpipchip@hotmail.com",
+      "maintainer": true
+    } 
+  ],
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/khoih-prog/GSM_Generic"
+  },
+  "license": "LGPL-3.0",
+  "frameworks": "arduino",
+  "dependencies": 
+  [
+  ],
+  "frameworks": "*",
+  "platforms": "*",
+  "examples": "examples/*/*/*.ino"
+}
