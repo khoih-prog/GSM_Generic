@@ -2,7 +2,7 @@
 
 [![arduino-library-badge](https://www.ardu-badge.com/badge/GSM_Generic.svg?)](https://www.ardu-badge.com/GSM_Generic)
 [![GitHub release](https://img.shields.io/github/release/khoih-prog/GSM_Generic.svg)](https://github.com/khoih-prog/GSM_Generic/releases)
-[![GitHub](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/khoih-prog/GSM_Generic/blob/master/LICENSE)
+[![GitHub](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/khoih-prog/GSM_Generic/blob/main/LICENSE)
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](#Contributing)
 [![GitHub issues](https://img.shields.io/github/issues/khoih-prog/GSM_Generic.svg)](http://github.com/khoih-prog/GSM_Generic/issues)
 
@@ -18,7 +18,7 @@
   * [To be Supported modems](#to-be-supported-modems)
   * [Currently supported Boards](#currently-supported-boards)
 * [Changelog](#changelog)
-  * [Release v1.2.4](#release-v123)
+  * [Release v1.2.4](#release-v124)
 * [Prerequisites](#prerequisites)
 * [Installation](#installation)
   * [Use Arduino Library Manager](#use-arduino-library-manager)
@@ -1438,9 +1438,9 @@ Please follow the instructions for the related GSM module.
 ---
 ---
 
-### Example [GSMWebClient](examples/GSMWebClient)
+### Example [GsmWebClient](examples/GsmWebClient)
 
-#### 1. File [GSMWebClient.ino](examples/GSMWebClient/GSMWebClient.ino)
+#### 1. File [GsmWebClient.ino](examples/GsmWebClient/GsmWebClient.ino)
 
 ```
 #include "defines.h"
@@ -1543,7 +1543,7 @@ void loop()
 
 ---
 
-#### 2. File [defines.h](examples/GSMWebClient/defines.h)
+#### 2. File [defines.h](examples/GsmWebClient/defines.h)
 
 ```
 #ifndef defines_h
