@@ -94,6 +94,9 @@
 * [Example GSMWebClient](#example-gsmwebclient)
   * [1. File GSMWebClient.ino](#1-file-gsmwebclientino)
   * [2. File defines.h](#2-file-definesh)
+* [Debug Terminal Output Samples](#debug-termimal-output-samples)
+  * [1. GSM_Blynk on NINA_B302_ublox with u-blox SARA-G350 GSM_GPRS modem](#1-gsm_blynk-on-nina_b302_ublox-with-u-blox-sara-g350-gsm_gprs-modem)
+  * [2. GSM_MQTT_ThingStream on NINA_B302_ublox with u-blox LISA-U201 GSM_GPRS modem](#2-gsm_mqtt_thingstream-on-nina_b302_ublox-with-u-blox-lisa-u201-gsm_gprs-modem)
 * [Debug](#debug)
 * [Troubleshooting](#troubleshooting)
 * [Releases](#releases)
@@ -105,7 +108,6 @@
 * [License](#license)
 * [Copyright](#copyright)
 
----
 ---
 
 ## Why do we need this [GSM_Generic library](https://github.com/khoih-prog/GSM_Generic)
@@ -1625,6 +1627,63 @@ void loop()
 
 #endif    //defines_h
 ```
+
+---
+---
+
+### Debug Termimal Output Samples
+
+#### 1. GSM_Blynk on NINA_B302_ublox with u-blox SARA-G350 GSM_GPRS modem
+
+Check [**NINA B302 ACCESSING BLYNK VIA GSM - SARA G350**](https://nina-gsm.blogspot.com/2021/03/u-blox-nina-e-rede-gsm-o-objetivo-deste.html)
+
+```
+Start GSM_Blynk on NINA_B302_ublox
+GSM_Generic v1.2.4
+[2485] 
+    ___ __ __
+   / _) / / _ _____ / / __
+  / _ / / // / _ \ / '_ /
+ / ____ / _ / \ _, / _ // _ / _ / \ _ \
+        / ___ / v0.6.7 on Arduino
+
+[GSM] begin: UART baud = 115200
+[GSM] GSMClient :: handleUrc: usr = + UUPSDD: 0
+[GSM] GSMClient :: handleUrc: usr = + UUSOCL: 0
+[GSM] begin: Check autosense
+[GSM] begin: Modem OK
+[GSM] GSM :: begin: _gsmData._state = GSM_ERROR
+Connect GPRS failed, try = 1
+[GSM] begin: UART baud = 115200
+[GSM] begin: Check autosense
+[GSM] GSMClient :: handleUrc: usr = OK
+[GSM] begin: Modem OK
+[GSM] GSM :: begin: _gsmData._state = GSM_IDLE
+
+Connected to GPRS. IP address = 10.52.37.49
+nect: host = blynk-cloud.com, port = 8080
+[GSM] GSMClient :: connect: OK
+[GSM] GSMClient :: connected: OK
+[GSM] GSMClient :: connected: OK
+[GSM] GSMClient :: connected: OK
+[GSM] GSMClient :: connected: OK
+[28840] Ready (ping: 551ms).
+[GSM] GSMClient :: connected: OK
+[GSM] GSMClient :: connected: OK
+[GSM] GSMClient :: handleUrc: usr = + UUSORD: 0.5
+[GSM] GSMClient :: connected: OK
+[GSM] GSMClient :: connected: OK
+[GSM] GSMClient :: connected: OK
+[GSM] GSMClient :: connected: OK
+[GSM] GSMClient :: connected: OK
+[GSM] GSMClient :: connected: OK
+[GSM] GSMClient :: connected: OK
+```
+
+#### 2. GSM_MQTT_ThingStream on NINA_B302_ublox with u-blox LISA-U201 GSM_GPRS modem
+
+Check [**U-BLOX NINA B302 + GSM ACCESSING THINGSTREAM.IO**](https://nina-gsm.blogspot.com/2021/03/u-blox-nina-e-rede-gsm-o-objetivo-deste.html)
+
 
 
 ---
