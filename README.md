@@ -94,7 +94,7 @@
 * [Example GSMWebClient](#example-gsmwebclient)
   * [1. File GSMWebClient.ino](#1-file-gsmwebclientino)
   * [2. File defines.h](#2-file-definesh)
-* [Debug Terminal Output Samples](#debug-termimal-output-samples)
+* [Debug Terminal Output Samples](#debug-terminal-output-samples)
   * [1. GSM_Blynk on NINA_B302_ublox with u-blox SARA-G350 GSM_GPRS modem](#1-gsm_blynk-on-nina_b302_ublox-with-u-blox-sara-g350-gsm_gprs-modem)
   * [2. GSM_MQTT_ThingStream on NINA_B302_ublox with u-blox LISA-U201 GSM_GPRS modem](#2-gsm_mqtt_thingstream-on-nina_b302_ublox-with-u-blox-lisa-u201-gsm_gprs-modem)
 * [Debug](#debug)
@@ -1631,7 +1631,7 @@ void loop()
 ---
 ---
 
-### Debug Termimal Output Samples
+### Debug Terminal Output Samples
 
 #### 1. GSM_Blynk on NINA_B302_ublox with u-blox SARA-G350 GSM_GPRS modem
 
