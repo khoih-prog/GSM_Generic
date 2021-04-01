@@ -18,7 +18,7 @@
   * [To be Supported modems](#to-be-supported-modems)
   * [Currently supported Boards](#currently-supported-boards)
 * [Changelog](#changelog)
-  * [Malor Release v1.3.0](#major-release-v130)
+  * [Major Release v1.3.0](#major-release-v130)
   * [Release v1.2.4](#release-v124)
 * [Prerequisites](#prerequisites)
 * [Installation](#installation)
@@ -212,7 +212,7 @@ This [**GSM_Generic** library](https://github.com/khoih-prog/GSM_Generic) curren
 
 ## Changelog
 
-### Malor Release v1.3.0
+### Major Release v1.3.0
 
 1. Fix SMS receive bug.
 2. Add option to load Root Certs only when necessary for SSL.
@@ -239,7 +239,7 @@ This [**GSM_Generic** library](https://github.com/khoih-prog/GSM_Generic) curren
  6. [`Seeeduino SAMD core 1.8.1+`](https://github.com/Seeed-Studio/ArduinoCore-samd) for SAMD21/SAMD51 boards (XIAO M0, Wio Terminal, etc.). [![Latest release](https://img.shields.io/github/release/Seeed-Studio/ArduinoCore-samd.svg)](https://github.com/Seeed-Studio/ArduinoCore-samd/releases/latest/)
  7. [`Adafruit nRF52 v0.21.0+`](https://www.adafruit.com) for nRF52 boards such as Adafruit NRF52840_FEATHER, NRF52832_FEATHER, NRF52840_FEATHER_SENSE, NRF52840_ITSYBITSY, NRF52840_CIRCUITPLAY, NRF52840_CLUE, NRF52840_METRO, NRF52840_PCA10056, PARTICLE_XENON, **NINA_B302_ublox**, etc. [![GitHub release](https://img.shields.io/github/release/adafruit/Adafruit_nRF52_Arduino.svg)](https://github.com/adafruit/Adafruit_nRF52_Arduino/releases/latest)
  8. [`ESP8266 Core 2.7.4+`](https://github.com/esp8266/Arduino) for ESP8266-based boards. [![Latest release](https://img.shields.io/github/release/esp8266/Arduino.svg)](https://github.com/esp8266/Arduino/releases/latest/). To use ESP8266 core 2.7.1+ for LittleFS. 
- 9. [`ESP32 Core 1.0.5+`](https://github.com/espressif/arduino-esp32) for ESP32-based boards. [![Latest release](https://img.shields.io/github/release/espressif/arduino-esp32.svg)](https://github.com/espressif/arduino-esp32/releases/latest/)
+ 9. [`ESP32 Core 1.0.6+`](https://github.com/espressif/arduino-esp32) for ESP32-based boards. [![Latest release](https://img.shields.io/github/release/espressif/arduino-esp32.svg)](https://github.com/espressif/arduino-esp32/releases/latest/)
 10. [`ESP32S2 Core 1.0.5+`](https://github.com/espressif/arduino-esp32/tree/esp32s2) for ESP32S2-based boards.
 11. [`Arduino Core for STM32 v1.9.0+`](https://github.com/stm32duino/Arduino_Core_STM32) for STM32 boards. [![GitHub release](https://img.shields.io/github/release/stm32duino/Arduino_Core_STM32.svg)](https://github.com/stm32duino/Arduino_Core_STM32/releases/latest)
 
