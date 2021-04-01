@@ -1800,12 +1800,10 @@ Check [**U-BLOX NINA B302 + GSM ACCESSING THINGSTREAM.IO (SSL)**](https://nina-b
 Debug is enabled by default on Serial. Debug Level from 0 to 4. To disable, change the `_GSM_GENERIC_LOGLEVEL_` to 0
 
 ```cpp
-// Use this to output debug msgs to Serial
 #define DEBUG_GSM_GENERIC_PORT       Serial
 
-// Use this to disable all output debug msgs
-// Debug Level from 0 to 4
-#define _GSM_GENERIC_LOGLEVEL_       0
+// Debug Level from 0 to 5. Level 5 is to print out AT commands and responses
+#define _GSM_GENERIC_LOGLEVEL_       5
 ```
 
 ---
