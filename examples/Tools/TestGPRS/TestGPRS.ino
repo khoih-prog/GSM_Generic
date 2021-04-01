@@ -18,11 +18,12 @@
   You should have received a copy of the GNU General Public License along with this program.
   If not, see <https://www.gnu.org/licenses/>.  
  
-  Version: 1.2.4
+  Version: 1.3.0
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   1.2.4    K Hoang     11/03/2021 Initial public release to add support to many boards / modules besides MKRGSM 1400 / SARA U201
+  1.3.0    K Hoang     31/03/2021 Add ThingStream MQTTS support. Fix SMS receive bug.
  **********************************************************************************************************************************/
 /*
 
@@ -39,6 +40,8 @@
 */
 
 #include "defines.h"
+
+#define USING_SERIAL_INPUT      false
 
 // Please enter your sensitive data in the Secret tab or arduino_secrets.h
 // PIN Number
@@ -77,6 +80,10 @@ void setup()
 
   Serial.print(F("\nStarting TestGPRS on ")); Serial.println(BOARD_NAME);
   Serial.println(GSM_GENERIC_VERSION);
+
+#if ( defined(DEBUG_GSM_GENERIC_PORT) && (_GSM_GENERIC_LOGLEVEL_ > 4) )
+  MODEM.debug(DEBUG_GSM_GENERIC_PORT);
+#endif  
 }
 
 void loop() 
@@ -85,7 +92,7 @@ void loop()
 
   // start GSM shield
   // if your SIM has PIN, pass it as a parameter of begin() in quotes
-  Serial.print("Connecting GSM network...");
+  Serial.println("Connecting GSM network...");
   
   if (gsmAccess.begin(baudRateSerialGSM, PINNUMBER) != GSM_READY)
   {
@@ -96,21 +103,41 @@ void loop()
   Serial.println(oktext);
 
   // read APN introduced by user
-  char apn[50];
+  
   Serial.print("Enter your APN: ");
+  
+#if USING_SERIAL_INPUT  
+  char apn[50];
   readSerial(apn);
+#else
+  char apn[] = SECRET_GPRS_APN;
+#endif
+  
   Serial.println(apn);
 
   // Read APN login introduced by user
-  char login[50];
   Serial.print("Now, enter your login: ");
+
+#if USING_SERIAL_INPUT  
+  char login[50];
   readSerial(login);
+#else
+  char login[] = SECRET_GPRS_LOGIN;
+#endif  
+
   Serial.println(login);
 
   // read APN password introduced by user
-  char password[20];
   Serial.print("Finally, enter your password: ");
+
+#if USING_SERIAL_INPUT  
+  char password[20];
   readSerial(password);
+#else
+  char password[] = SECRET_GPRS_PASSWORD;
+#endif
+
+  Serial.println(password);
 
   // attach GPRS
   Serial.println("Attaching to GPRS with your APN...");
@@ -124,13 +151,21 @@ void loop()
     Serial.println(oktext);
 
     // read proxy introduced by user
-    char proxy[100];
     Serial.print("If your carrier uses a proxy, enter it, if not press enter: ");
+
+#if USING_SERIAL_INPUT  
+    char proxy[100];
     readSerial(proxy);
+#else
+    char proxy[] = "";
+#endif
+         
     Serial.println(proxy);
 
     // connection with example.org and realize HTTP request
-    Serial.print("Connecting and sending GET request to example.org...");
+    Serial.print("Connecting and sending GET request to ");
+    Serial.println(url);
+    
     int res_connect;
     // if user introduced a proxy, asks them for proxy port
     int pport;
@@ -138,9 +173,17 @@ void loop()
     if (proxy[0] != '\0') 
     {
       // read proxy port introduced by user
-      char proxyport[10];
       Serial.print("Enter the proxy port: ");
+
+#if USING_SERIAL_INPUT  
+      char proxyport[10];
       readSerial(proxyport);
+#else
+      char proxyport[] = SECRET_GPRS_PASSWORD;
+#endif
+
+      Serial.println(proxyport);
+
       // cast proxy port introduced to integer
       pport = (int) proxyport;
       use_proxy = true;
@@ -156,6 +199,8 @@ void loop()
 
     if (res_connect) 
     {
+      delay(1000);
+      
       // make a HTTP 1.0 GET request (client sends the request)
       client.print("GET ");
 
@@ -169,7 +214,8 @@ void loop()
         client.print(path);
       }
 
-      client.println(" HTTP/1.0");
+      //client.println(" HTTP/1.0");
+      client.println(" HTTP/1.1");
       client.println();
       Serial.println(oktext);
     } 

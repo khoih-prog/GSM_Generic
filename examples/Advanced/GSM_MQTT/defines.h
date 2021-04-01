@@ -24,17 +24,13 @@
 
 #define DEBUG_GSM_GENERIC_PORT       Serial
 
-// Debug Level from 0 to 4
+// Debug Level from 0 to 5. Level 5 is to print out AT commands and responses
 #define _GSM_GENERIC_LOGLEVEL_       4
 
 #define SECRET_PINNUMBER     ""
-#define SECRET_GPRS_APN      "GPRS_APN" // replace your GPRS APN
-#define SECRET_GPRS_LOGIN    "login"    // replace with your GPRS login
-#define SECRET_GPRS_PASSWORD "password" // replace with your GPRS password
-
-#if ( defined(ARDUINO_NUCLEO_F767ZI) || defined(ARDUINO_NUCLEO_L053R8) )
-  HardwareSerial Serial1(D0, D1);   // (PA3, PA2) for ARDUINO_NUCLEO_L053R8
-#endif
+#define SECRET_GPRS_APN      "rogers-core-appl1.apn"    //"GPRS_APN" // replace your GPRS APN
+#define SECRET_GPRS_LOGIN    ""                         //"login"    // replace with your GPRS login
+#define SECRET_GPRS_PASSWORD ""                         //"password" // replace with your GPRS password
 
 //////////////////////////////////////////////
 
@@ -44,15 +40,32 @@
   #define GSM_RESETN  (10u)
   #define GSM_DTR     (11u)
 
-  #if !ESP8266
-    #define SerialGSM   Serial1
+  #if ESP8266
+    // Using Software Serial for ESP8266, as Serial1 is TX only
+    #define GSM_USING_SOFTWARE_SERIAL     true
   #else
-    #warning Using default SerialGSM = Serial => can not use Serial for Debug Terminal
-
-    #define SerialGSM   Serial
+    // Optional Software Serial here for other boards, but not advised if HW Serial available
+    #define GSM_USING_SOFTWARE_SERIAL     false
   #endif
+   
+  #if GSM_USING_SOFTWARE_SERIAL
+    #warning Using default SerialGSM = SoftwareSerial
+    
+    #define D8 (15)
+    #define D7 (13)
+    
+    #include <SoftwareSerial.h>
+    
+    SoftwareSerial swSerial(D7, D8);    // (D7, D8, false, 256); // (RX, TX, false, 256);
+    
+    #define SerialGSM   swSerial
+  #else
+    #warning Using default SerialGSM = HardwareSerial Serial1
+    #define SerialGSM   Serial1
+  #endif    // GSM_USING_SOFTWARE_SERIAL
 
   #warning You must connect the Modem correctly and modify the pins / Serial port here
+  
 #endif
 
 //////////////////////////////////////////////
@@ -64,7 +77,7 @@
 
 //////////////////////////////////////////////
 
-#define GSM_MODEM_UBLOX             true
+#define GSM_MODEM_UBLOX             false
 #define GSM_MODEM_SARAR4            false
 
 //////////////////////////////////////////////
@@ -72,7 +85,7 @@
 #define GSM_MODEM_SIM800            false
 #define GSM_MODEM_SIM808            false
 #define GSM_MODEM_SIM868            false
-#define GSM_MODEM_SIM900            false
+#define GSM_MODEM_SIM900            true
 #define GSM_MODEM_SIM5300           false
 #define GSM_MODEM_SIM5320           false
 #define GSM_MODEM_SIM5360           false

@@ -18,11 +18,12 @@
   You should have received a copy of the GNU General Public License along with this program.
   If not, see <https://www.gnu.org/licenses/>.
 
-  Version: 1.2.4
+  Version: 1.3.0
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   1.2.4    K Hoang     11/03/2021 Initial public release to add support to many boards / modules besides MKRGSM 1400 / SARA U201
+  1.3.0    K Hoang     31/03/2021 Add ThingStream MQTTS support. Fix SMS receive bug.
  **********************************************************************************************************************************/
 
 /*
@@ -56,8 +57,8 @@ GPRS gprs;
 GSM gsmAccess;
 
 // URL, path and port (for example: example.org)
-char server[] = "example.org";
-char path[]   = "/";
+char server[] = "arduino.cc";         //"example.org";
+char path[]   = "/asciilogo.txt";     //"/";
 int port      = 80; // port 80 is the default for HTTP
 
 // BaudRate to communicate to GSM/GPRS modem. If be limit to max 115200 inside modem
@@ -73,6 +74,10 @@ void setup()
 
   Serial.print(F("\nStarting GSMWebClient on ")); Serial.println(BOARD_NAME);
   Serial.println(GSM_GENERIC_VERSION);
+
+#if ( defined(DEBUG_GSM_GENERIC_PORT) && (_GSM_GENERIC_LOGLEVEL_ > 4) )
+  MODEM.debug(DEBUG_GSM_GENERIC_PORT);
+#endif  
 
   // connection state
   bool connected = false;
@@ -100,6 +105,18 @@ void setup()
   {
     Serial.println("connected");
     // Make a HTTP request:
+    delay(2000);
+    
+ #if 1
+    
+    String command = "GET /asciilogo.txt HTTP/1.1\r\nHost: arduino.cc\r\nConnection: close\r\n";
+    //String command = "GET /asciilogo.txt HTTP/1.1\nHost: arduino.cc\nConnection: close";
+    client.println(command);
+    //client.println(F("GET /asciilogo.txt HTTP/1.1"));
+    //client.println(F("Host: arduino.cc"));
+    //client.println(F("Connection: close"));
+    //client.println();
+ #else
     client.print("GET ");
     client.print(path);
     client.println(" HTTP/1.1");
@@ -107,6 +124,7 @@ void setup()
     client.println(server);
     client.println("Connection: close");
     client.println();
+ #endif   
   } 
   else 
   {
@@ -133,6 +151,7 @@ void loop()
     client.stop();
 
     // do nothing forevermore:
-    while(true);
+    //while(true);
+    delay(1000);
   }
 }

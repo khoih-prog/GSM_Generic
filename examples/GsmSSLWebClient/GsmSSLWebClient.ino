@@ -18,11 +18,12 @@
   You should have received a copy of the GNU General Public License along with this program.
   If not, see <https://www.gnu.org/licenses/>.  
  
-  Version: 1.2.4
+  Version: 1.3.0
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   1.2.4    K Hoang     11/03/2021 Initial public release to add support to many boards / modules besides MKRGSM 1400 / SARA U201
+  1.3.0    K Hoang     31/03/2021 Add ThingStream MQTTS support. Fix SMS receive bug.
  **********************************************************************************************************************************/
 /*
   Web client
@@ -58,8 +59,8 @@ GPRS gprs;
 GSM gsmAccess;
 
 // URL, path and port (for example: arduino.cc)
-char server[] = "arduino.cc";
-char path[]   = "/asciilogo.txt";
+char server[] = "www.cloudflare.com";
+char path[]   = "/cdn-cgi/trace";
 int port      = 443; // port 443 is the default for HTTPS
 
 void setup()
@@ -95,7 +96,10 @@ void setup()
   Serial.println("connecting...");
 
   // if you get a connection, report back via serial:
-  if (client.connect(server, port)) 
+  // Use this to load Root Certs the first time
+  // if (client.connect(server, port)) 
+  // Use this to not load Root Certs anymore as done last time and stored in modem's flash
+  if (client.connect(server, port, false)) 
   {
     Serial.println("connected");
     // Make a HTTP request:

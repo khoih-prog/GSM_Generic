@@ -1,5 +1,5 @@
 /****************************************************************************************************************************
-  GSM_MQTT_ThingStream.ino - Dead simple MQTT Client for GSM/GPRS shields
+  GSM_MQTTS_ThingStream.ino - Dead simple MQTT Client for GSM/GPRS shields
 
   For ESP8266, ESP32, SAMD21/SAMD51, nRF52, SAM DUE, Teensy and STM32 with GSM modules
 
@@ -26,7 +26,7 @@
   1.3.0    K Hoang     31/03/2021 Add ThingStream MQTTS support. Fix SMS receive bug.
  *****************************************************************************************************************************/
 /*
-  Basic MQTT example (without SSL!)
+  Basic MQTT example (with SSL!)
   This sketch demonstrates the basic capabilities of the library.
   It connects to an MQTT server then:
   - publishes {Hello from MQTTClient_SSL on NUCLEO_F767ZI} to the topic [STM32_Pub]
@@ -35,11 +35,6 @@
   It will reconnect to the server if the connection is lost using a blocking
   reconnect function. See the 'mqtt_reconnect_nonblocking' example for how to
   achieve the same result without blocking the main loop.
-
-  You will need to populate "certificates.h" with your trust anchors
-  (see https://github.com/OPEnSLab-OSU/SSLClient/blob/master/TrustAnchors.md)
-  and my_cert/my_key with your certificate/private key pair
-  (see https://github.com/OPEnSLab-OSU/SSLClient#mtls).
 */
 
 #include "defines.h"
@@ -92,7 +87,7 @@ String      subTopic    = "STM32_Sub";              // Topic to subcribe to
 
 void mqtt_receive_callback(char* topic, byte* payload, unsigned int length);
 
-const int   MQTT_PORT           = 1883; //if you use SSL //1883 no SSL
+const int   MQTT_PORT           = 8883; //if you use SSL //1883 no SSL
 
 unsigned long lastMsg = 0;
 
@@ -102,7 +97,7 @@ unsigned long lastMsg = 0;
 //////////////////////////////////////////////////////
 
 // initialize the library instance
-GSMClient gsmClient;
+GSMSSLClient gsmClient;
 GPRS gprs;
 GSM gsmAccess;
 
@@ -163,14 +158,10 @@ void reconnect()
       Serial.print("Subcribed to: ");
       Serial.println(subTopic);
       
-      // This is a workaround to address https://github.com/OPEnSLab-OSU/SSLClient/issues/9
-      //ethClientSSL.flush();
       // ... and resubscribe
       client.subscribe(subTopic.c_str());
       // for loopback testing
       client.subscribe(topic.c_str());
-      // This is a workaround to address https://github.com/OPEnSLab-OSU/SSLClient/issues/9
-      //ethClientSSL.flush();
     } 
     else 
     {
@@ -211,6 +202,8 @@ void connectToGPRS()
 
   connected = true;
 
+  gsmClient.connect(MQTT_SERVER, MQTT_PORT, false);
+
   //Get IP.
   IPAddress LocalIP = gprs.getIPAddress();
   Serial.print("\nConnected to GPRS. IP address = ");
@@ -225,7 +218,7 @@ void setup()
 
   delay(200);
 
-  Serial.print(F("\nStart GSM_MQTT_ThingStream on ")); Serial.println(BOARD_NAME);
+  Serial.print(F("\nStart GSM_MQTTS_ThingStream on ")); Serial.println(BOARD_NAME);
   Serial.println(GSM_GENERIC_VERSION);
 
 #if ( defined(DEBUG_GSM_GENERIC_PORT) && (_GSM_GENERIC_LOGLEVEL_ > 4) )

@@ -18,11 +18,12 @@
   You should have received a copy of the GNU General Public License along with this program.
   If not, see <https://www.gnu.org/licenses/>.
 
-  Version: 1.2.4
+  Version: 1.3.0
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   1.2.4    K Hoang     11/03/2021 Initial public release to add support to many boards / modules besides MKRGSM 1400 / SARA U201
+  1.3.0    K Hoang     31/03/2021 Add ThingStream MQTTS support. Fix SMS receive bug.
  **********************************************************************************************************************************/
 /*
   Band Management
@@ -46,9 +47,10 @@
   by Javier Zorzano, Scott Fitzgerald
 */
 
-#if ( defined(ARDUINO_NUCLEO_F767ZI) || defined(ARDUINO_NUCLEO_L053R8) )
-  HardwareSerial Serial1(D0, D1);   // (PA3, PA2) for ARDUINO_NUCLEO_L053R8
-#endif
+#define DEBUG_GSM_GENERIC_PORT       Serial
+
+// Debug Level from 0 to 6. Level 6 is to print out AT commands and responses
+#define _GSM_GENERIC_LOGLEVEL_       4
 
 //////////////////////////////////////////////
 
@@ -58,15 +60,32 @@
   #define GSM_RESETN  (10u)
   #define GSM_DTR     (11u)
 
-  #if !ESP8266
-    #define SerialGSM   Serial1
+  #if ESP8266
+    // Using Software Serial for ESP8266, as Serial1 is TX only
+    #define GSM_USING_SOFTWARE_SERIAL     true
   #else
-    #warning Using default SerialGSM = Serial => can not use Serial for Debug Terminal
-
-    #define SerialGSM   Serial
+    // Optional Software Serial here for other boards, but not advised if HW Serial available
+    #define GSM_USING_SOFTWARE_SERIAL     false
   #endif
+   
+  #if GSM_USING_SOFTWARE_SERIAL
+    #warning Using default SerialGSM = SoftwareSerial
+    
+    #define D8 (15)
+    #define D7 (13)
+    
+    #include <SoftwareSerial.h>
+    
+    SoftwareSerial swSerial(D7, D8);    // (D7, D8, false, 256); // (RX, TX, false, 256);
+    
+    #define SerialGSM   swSerial
+  #else
+    #warning Using default SerialGSM = HardwareSerial Serial1
+    #define SerialGSM   Serial1
+  #endif    // GSM_USING_SOFTWARE_SERIAL
 
   #warning You must connect the Modem correctly and modify the pins / Serial port here
+  
 #endif
 
 //////////////////////////////////////////////
@@ -78,7 +97,7 @@
 
 //////////////////////////////////////////////
 
-#define GSM_MODEM_UBLOX             true
+#define GSM_MODEM_UBLOX             false
 #define GSM_MODEM_SARAR4            false
 
 //////////////////////////////////////////////
@@ -86,7 +105,7 @@
 #define GSM_MODEM_SIM800            false
 #define GSM_MODEM_SIM808            false
 #define GSM_MODEM_SIM868            false
-#define GSM_MODEM_SIM900            false
+#define GSM_MODEM_SIM900            true
 #define GSM_MODEM_SIM5300           false
 #define GSM_MODEM_SIM5320           false
 #define GSM_MODEM_SIM5360           false
@@ -194,6 +213,10 @@ void setup()
 
   Serial.print(F("\nStarting BandManagement on ")); Serial.println(BOARD_NAME);
   Serial.println(GSM_GENERIC_VERSION);
+
+#if ( defined(DEBUG_GSM_GENERIC_PORT) && (_GSM_GENERIC_LOGLEVEL_ > 5) )
+  MODEM.debug(DEBUG_GSM_GENERIC_PORT);
+#endif  
 
   // Beginning the band manager restarts the modem
   Serial.println("Restarting modem...");

@@ -18,11 +18,12 @@
   You should have received a copy of the GNU General Public License along with this program.
   If not, see <https://www.gnu.org/licenses/>.  
  
-  Version: 1.2.4
+  Version: 1.3.0
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   1.2.4    K Hoang     11/03/2021 Initial public release to add support to many boards / modules besides MKRGSM 1400 / SARA U201
+  1.3.0    K Hoang     31/03/2021 Add ThingStream MQTTS support. Fix SMS receive bug.
  **********************************************************************************************************************************/
 /*
   This sketch Shows how to use the HTTP command to makes http request to the https end point and stores
@@ -99,6 +100,10 @@ void setup()
 
   Serial.print(F("\nStarting HttpUtilsSSLGet on ")); Serial.println(BOARD_NAME);
   Serial.println(GSM_GENERIC_VERSION);
+
+#if ( defined(DEBUG_GSM_GENERIC_PORT) && (_GSM_GENERIC_LOGLEVEL_ > 4) )
+  MODEM.debug(DEBUG_GSM_GENERIC_PORT);
+#endif  
 
   bool connected = false;
   

@@ -18,11 +18,12 @@
   You should have received a copy of the GNU General Public License along with this program.
   If not, see <https://www.gnu.org/licenses/>.
 
-  Version: 1.2.4
+  Version: 1.3.0
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   1.2.4    K Hoang     11/03/2021 Initial public release to add support to many boards / modules besides MKRGSM 1400 / SARA U201
+  1.3.0    K Hoang     31/03/2021 Add ThingStream MQTTS support. Fix SMS receive bug.
  *****************************************************************************************************************************/
 /*************************************************************
   Download latest Blynk library here:
@@ -78,6 +79,46 @@ unsigned long baudRateSerialGSM  = 115200;
 // Go to the Project Settings (nut icon).
 char auth[] = "YourAuthToken";
 
+void heartBeatPrint()
+{
+  static int num = 1;
+
+  if (Blynk.connected())
+  {
+    Serial.print(F("B"));
+  }
+  else
+  {
+    Serial.print(F("F"));
+  }
+
+  if (num == 40)
+  {
+    Serial.println();
+    num = 1;
+  }
+  else if (num++ % 10 == 0)
+  {
+    Serial.print(F(" "));
+  }
+}
+
+void check_status()
+{
+  static unsigned long checkstatus_timeout = 0;
+
+#define STATUS_CHECK_INTERVAL     10000L
+
+  // Send status report every STATUS_REPORT_INTERVAL (60) seconds: we don't need to send updates frequently if there is no status change.
+  if ((millis() > checkstatus_timeout) || (checkstatus_timeout == 0))
+  {
+    // report status to Blynk
+    heartBeatPrint();
+
+    checkstatus_timeout = millis() + STATUS_CHECK_INTERVAL;
+  }
+}
+
 bool connectToGPRS()
 {
   #define NUMBER_OF_CONNECTION_TRIES      10
@@ -125,16 +166,41 @@ void setup()
   Serial.print(F("\nStart GSM_Blynk on ")); Serial.println(BOARD_NAME);
   Serial.println(GSM_GENERIC_VERSION);
 
+#if ( defined(DEBUG_GSM_GENERIC_PORT) && (_GSM_GENERIC_LOGLEVEL_ > 5) )
+  MODEM.debug(DEBUG_GSM_GENERIC_PORT);
+#endif  
+
 #if USING_NON_BLOCK_BLYNK_CONNECT
   Blynk.config(gsmAccess, gprs, gsmClient, auth, blynk_server, BLYNK_HARDWARE_PORT);
   
   GSM_CONNECT_OK = connectToGPRS();
 
   if (GSM_CONNECT_OK)
+  {
+    Serial.println(F("GSM_CONNECT_OK. Connecting to Blynk"));
+    
     Blynk.connect();
+  }
+  else
+  {
+    Serial.println(F("GSM_CONNECT_ERROR"));
+  }
+   
 #else
   Blynk.begin(auth, gsmAccess, gprs, gsmClient, PINNUMBER, GPRS_APN, GPRS_LOGIN, GPRS_PASSWORD);
-#endif  
+#endif
+
+  
+   Serial.println(F("Checking Blynk now"));
+
+  if (Blynk.connected())
+  {
+    Serial.println(F("Blynk connected OK"));
+  }
+  else
+  {
+    Serial.println(F("Blynk connected error"));
+  }
 }
 
 void loop()
@@ -150,6 +216,9 @@ void loop()
   }
   else
   {
-    delay(10000);
+    delay(1000);
   }
+
+  check_status();
+  Serial.print(F("B"));
 }
