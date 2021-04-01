@@ -18,11 +18,12 @@
   You should have received a copy of the GNU General Public License along with this program.
   If not, see <https://www.gnu.org/licenses/>.  
  
-  Version: 1.2.4
+  Version: 1.3.0
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   1.2.4    K Hoang     11/03/2021 Initial public release to add support to many boards / modules besides MKRGSM 1400 / SARA U201
+  1.3.0    K Hoang     31/03/2021 Add ThingStream MQTTS support. Fix SMS receive bug.
  **********************************************************************************************************************************/
 
 #pragma once
@@ -46,8 +47,8 @@ class GSMSSLClient : public GSMClient
 
     virtual int ready();
 
-    virtual int connect(IPAddress ip, uint16_t port);
-    virtual int connect(const char* host, uint16_t port);
+    virtual int connect(IPAddress ip, uint16_t port, bool loadRootCert = false);
+    virtual int connect(const char* host, uint16_t port, bool loadRootCert = false);
     virtual void setSignedCertificate(const uint8_t* cert, const char* name, size_t size);
     virtual void setPrivateKey(const uint8_t* key, const char* name, size_t size);
     virtual void useSignedCertificate(const char* name);

@@ -18,11 +18,12 @@
   You should have received a copy of the GNU General Public License along with this program.
   If not, see <https://www.gnu.org/licenses/>.  
  
-  Version: 1.2.4
+  Version: 1.3.0
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   1.2.4    K Hoang     11/03/2021 Initial public release to add support to many boards / modules besides MKRGSM 1400 / SARA U201
+  1.3.0    K Hoang     31/03/2021 Add ThingStream MQTTS support. Fix SMS receive bug.
  **********************************************************************************************************************************/
 
 #pragma once
@@ -153,18 +154,44 @@ int GSMSSLClient::ready()
   return ready;
 }
 
-int GSMSSLClient::connect(IPAddress ip, uint16_t port)
+int GSMSSLClient::connect(IPAddress ip, uint16_t port, bool loadRootCert)
 {
-  _certIndex = 0;
-  _state = SSL_CLIENT_STATE_LOAD_ROOT_CERT;
+  if (loadRootCert)
+  {
+    // Root Certs not yet loaded and saved. Load now just once
+    _certIndex = 0;
+    _state = SSL_CLIENT_STATE_LOAD_ROOT_CERT;
+  }
+  else
+  {
+    // Root Certs already loaded and saved last time. 
+    _certIndex = _sizeRoot;
+    _state = SSL_CLIENT_STATE_LOAD_ROOT_CERT;
+    
+    // all certs loaded
+    _rootCertsLoaded = true;
+  }
 
   return connectSSL(ip, port);
 }
 
-int GSMSSLClient::connect(const char* host, uint16_t port)
+int GSMSSLClient::connect(const char* host, uint16_t port, bool loadRootCert)
 {
-  _certIndex = 0;
-  _state = SSL_CLIENT_STATE_LOAD_ROOT_CERT;
+  if (loadRootCert)
+  {
+    // Root Certs not yet loaded and saved. Load now just once
+    _certIndex = 0;
+    _state = SSL_CLIENT_STATE_LOAD_ROOT_CERT;
+  }
+  else
+  {
+    // Root Certs already loaded and saved last time. 
+    _certIndex = _sizeRoot;
+    _state = SSL_CLIENT_STATE_LOAD_ROOT_CERT;
+    
+    // all certs loaded
+    _rootCertsLoaded = true;
+  }
 
   return connectSSL(host, port);
 }

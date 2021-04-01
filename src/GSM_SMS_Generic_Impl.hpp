@@ -18,11 +18,12 @@
   You should have received a copy of the GNU General Public License along with this program.
   If not, see <https://www.gnu.org/licenses/>.  
  
-  Version: 1.2.4
+  Version: 1.3.0
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   1.2.4    K Hoang     11/03/2021 Initial public release to add support to many boards / modules besides MKRGSM 1400 / SARA U201
+  1.3.0    K Hoang     31/03/2021 Add ThingStream MQTTS support. Fix SMS receive bug.
  **********************************************************************************************************************************/
 
 #pragma once
@@ -68,41 +69,7 @@ int GSM_SMS::beginSMS(const char* to)
 
 int GSM_SMS::ready()
 {
-  int ready = MODEM.ready();
-
-  if (ready == 0)
-  {
-    return 0;
-  }
-
-  switch (_smsData.state)
-  {
-    case SMS_STATE_IDLE:
-    default:
-      {
-        break;
-      }
-
-    case SMS_STATE_LIST_MESSAGES:
-      {
-        MODEM.setResponseDataStorage(&_incomingBuffer);
-        
-        // List message +CMGL => received unread SMS messages
-        MODEM.receivedUnreadSMS();
-        
-        _smsData.state = SMS_STATE_WAIT_LIST_MESSAGES_RESPONSE;
-        ready = 0;
-        break;
-      }
-
-    case SMS_STATE_WAIT_LIST_MESSAGES_RESPONSE:
-      {
-        _smsData.state = SMS_STATE_IDLE;
-        break;
-      }
-  }
-
-  return ready;
+  return MODEM.readySMS(_smsData, _incomingBuffer);
 }
 
 int GSM_SMS::endSMS()

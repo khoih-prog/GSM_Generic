@@ -18,11 +18,12 @@
   You should have received a copy of the GNU General Public License along with this program.
   If not, see <https://www.gnu.org/licenses/>.  
  
-  Version: 1.2.4
+  Version: 1.3.0
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   1.2.4    K Hoang     11/03/2021 Initial public release to add support to many boards / modules besides MKRGSM 1400 / SARA U201
+  1.3.0    K Hoang     31/03/2021 Add ThingStream MQTTS support. Fix SMS receive bug.
  **********************************************************************************************************************************/
 
 
@@ -41,6 +42,7 @@
 // 2: WARN: errors and warnings
 // 3: INFO: errors, warnings and informational (default)
 // 4: DEBUG: errors, warnings, informational and debug
+// 5: ATDEBUG: errors, warnings, informational and debug including AT-commands
 
 #ifndef _GSM_GENERIC_LOGLEVEL_
   #define _GSM_GENERIC_LOGLEVEL_       0
@@ -89,6 +91,15 @@ const char GSM_MARK[] = "[GSM] ";
 #define GSM_LOGDEBUG2(x,y,z)          if(_GSM_GENERIC_LOGLEVEL_>3) { GSM_PRINT_MARK; GSM_PRINT(x); GSM_PRINT(y); GSM_PRINTLN(z); }
 #define GSM_LOGDEBUG3(x,y,z,w)        if(_GSM_GENERIC_LOGLEVEL_>3) { GSM_PRINT_MARK; GSM_PRINT(x); GSM_PRINT(y); GSM_PRINT(z); GSM_PRINTLN(w); }
 #define GSM_LOGDEBUG5(x,y,z,w,xx,yy)  if(_GSM_GENERIC_LOGLEVEL_>3) { GSM_PRINT_MARK; GSM_PRINT(x); GSM_PRINT(y); GSM_PRINT(z); GSM_PRINT(w); GSM_PRINT(xx); GSM_PRINTLN(yy); }
+
+///////////////////////////////////////////
+
+#define GSM_LOGATDEBUG0(x)              if(_GSM_GENERIC_LOGLEVEL_>4) { GSM_PRINT(x); }
+#define GSM_LOGATDEBUG(x)               if(_GSM_GENERIC_LOGLEVEL_>4) { GSM_PRINT_MARK; GSM_PRINTLN(x); }
+#define GSM_LOGATDEBUG1(x,y)            if(_GSM_GENERIC_LOGLEVEL_>4) { GSM_PRINT_MARK; GSM_PRINT(x); GSM_PRINTLN(y); }
+#define GSM_LOGATDEBUG2(x,y,z)          if(_GSM_GENERIC_LOGLEVEL_>4) { GSM_PRINT_MARK; GSM_PRINT(x); GSM_PRINT(y); GSM_PRINTLN(z); }
+#define GSM_LOGATDEBUG3(x,y,z,w)        if(_GSM_GENERIC_LOGLEVEL_>4) { GSM_PRINT_MARK; GSM_PRINT(x); GSM_PRINT(y); GSM_PRINT(z); GSM_PRINTLN(w); }
+#define GSM_LOGATDEBUG5(x,y,z,w,xx,yy)  if(_GSM_GENERIC_LOGLEVEL_>4) { GSM_PRINT_MARK; GSM_PRINT(x); GSM_PRINT(y); GSM_PRINT(z); GSM_PRINT(w); GSM_PRINT(xx); GSM_PRINTLN(yy); }
 
 ///////////////////////////////////////////
 

@@ -18,11 +18,12 @@
   You should have received a copy of the GNU General Public License along with this program.
   If not, see <https://www.gnu.org/licenses/>.  
  
-  Version: 1.2.4
+  Version: 1.3.0
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   1.2.4    K Hoang     11/03/2021 Initial public release to add support to many boards / modules besides MKRGSM 1400 / SARA U201
+  1.3.0    K Hoang     31/03/2021 Add ThingStream MQTTS support. Fix SMS receive bug.
  **********************************************************************************************************************************/
 
 #pragma once
@@ -394,7 +395,7 @@
   #endif
  
   #warning SerialGSM using SERIAL_PORT_HARDWARE, can be Serial or Serial1. See your board variant.h
-  #define SerialGSM     SERIAL_PORT_HARDWARE
+  //#define SerialGSM     SERIAL_PORT_HARDWARE
 
   #if defined(STM32F0)
     #warning STM32F0 board selected
@@ -415,7 +416,7 @@
 
     #if defined(ARDUINO_NUCLEO_F767ZI)
       #warning Nucleo-144 NUCLEO_F767ZI board selected, using HardwareSerial Serial1 @ pin D0/RX and D1/TX
-
+      HardwareSerial Serial1(D0, D1);   // (PA3, PA2) for ARDUINO_NUCLEO_L053R8
     #else
     
       #warning STM32F7 board selected
@@ -426,8 +427,8 @@
   #elif defined(STM32L0)
   
     #if defined(ARDUINO_NUCLEO_L053R8)
-      #warning Nucleo-64 NUCLEO_L053R8 board selected, using HardwareSerial Serial1 @ pin D0/RX and D1/TX
-
+      #warning Nucleo-64 NUCLEO_L053R8 board selected, using HardwareSerial Serial1 @ pin PA3/RX and PA2/TX
+      HardwareSerial Serial1(PA3, PA2);   // (PA3, PA2) for ARDUINO_NUCLEO_L053R8
     #else
     
       #warning STM32L0 board selected

@@ -1,5 +1,5 @@
 /*********************************************************************************************************************************
-  Modem_SaraR4_Generic.h
+  Modem_SIM800_Generic.h
   
   For ESP8266, ESP32, SAMD21/SAMD51, nRF52, SAM DUE, Teensy and STM32 with GSM modules
   
@@ -28,8 +28,8 @@
 
 #pragma once
 
-#ifndef _MODEM_SARA_R4_INCLUDED_H
-#define _MODEM_SARA_R4_INCLUDED_H
+#ifndef _MODEM_SIM800_INCLUDED_H
+#define _MODEM_SIM800_INCLUDED_H
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -47,8 +47,6 @@
 
 #elif ( GSM_USE_SAM_DUE )
   #define Uart      UARTClass
-#elif ( GSM_USING_SOFTWARE_SERIAL )
-  #define Uart      SoftwareSerial
 #else
   #define Uart      HardwareSerial
 #endif
@@ -81,39 +79,6 @@ class ModemUrcHandler
 
 class ModemClass 
 {
-  /////////////////////////////////////////
-
-  private:
-
-#if ( GSM_USE_SAMD || GSM_USE_NRF528XX )
-    Uart* _uart;
-#elif ( GSM_USING_SOFTWARE_SERIAL )
-    SoftwareSerial*   _uart;
-#else
-    HardwareSerial*   _uart;
-#endif
-    
-    unsigned long _baud;
-    
-    int _resetPin;     
-    int _dtrPin;
-    bool _lowPowerMode;
-
-    unsigned long _lastResponseOrUrcMillis;
-
-    enum 
-    {
-      AT_COMMAND_IDLE,
-      AT_RECEIVING_RESPONSE
-    } _atCommandState;
-    
-    int _ready;
-    String _buffer;
-    String* _responseDataStorage;
-
-    static ModemUrcHandler* _urcHandlers[MAX_URC_HANDLERS];
-    static Print* _debugPrint;
-    
   public:
   
 
@@ -135,9 +100,6 @@ class ModemClass
     
     int begin(unsigned long baud, bool restart = true)
     {
-      (void) restart;
-      
-#if UBLOX_USING_SET_BAUD
       bool newBaud = false;
       
       if (_baud != baud)
@@ -145,13 +107,6 @@ class ModemClass
         _baud = ( baud > 115200 ? 115200 : baud );
         newBaud = true;
       }
-#else    
-         
-      if (_baud != baud)
-      {
-        _baud = ( baud > 115200 ? 115200 : baud );
-      }
-#endif
         
       GSM_LOGDEBUG1(F("begin: UART baud = "), _baud);  
       
@@ -174,12 +129,13 @@ class ModemClass
       } 
       else  
       {
+#if 0      
         if (!autosense()) 
         {
           GSM_LOGDEBUG(F("begin: nonrestart autosense error"));
           return GSM_MODEM_START_ERROR;
         }
-
+#endif
         if (!reset()) 
         {
           GSM_LOGDEBUG(F("begin: reset error"));
@@ -193,33 +149,43 @@ class ModemClass
         return GSM_MODEM_START_ERROR;
       }
 #endif
-      
+
+#if 1
       GSM_LOGDEBUG(F("begin: Check autosense"));
 
       if (!autosense()) 
       {
         GSM_LOGDEBUG(F("begin: autosense error"));
-        return GSM_MODEM_START_ERROR;
+        //return GSM_MODEM_START_ERROR;
       }
+#endif
       
-#if UBLOX_USING_SET_BAUD
-  
       GSM_LOGDEBUG(F("begin: Check baud"));
 
       // KH, must always set baud here
-      // u-blox SARA and LISA can auto=adjust baurate, and we don't need to set baud
-      // unless UBLOX_USING_SET_BAUD is turned ON if modem don't have this auto feature
+      //if (_baud > 115200)
       if ( restart || newBaud )
       {
         GSM_LOGDEBUG1(F("begin: Set baud = "), _baud);
         
-        sendf("AT+IPR=%ld", _baud);
+        //sendf("AT+IPR=%ld", _baud);   // Auto-baud
+        send("AT+IPR=0");
         
         if (waitForResponse() != GSM_RESPONSE_OK) 
         {
           GSM_LOGDEBUG(F("begin: Set baud error"));
           return GSM_MODEM_START_ERROR;
         }
+        
+        // KH add to write / save config
+        send("AT&W");
+        
+        if (waitForResponse() != GSM_RESPONSE_OK) 
+        {
+          GSM_LOGDEBUG(F("begin: Set baud error"));
+          return GSM_MODEM_START_ERROR;
+        }
+        //////
 
         _uart->end();
         delay(100);
@@ -231,8 +197,6 @@ class ModemClass
           return GSM_MODEM_START_ERROR;
         }
       }
-      
-#endif
 
 #if UBLOX_USING_LOW_POWER_MODE 
       if (_dtrPin > -1) 
@@ -254,8 +218,6 @@ class ModemClass
 
       return GSM_MODEM_START_OK;
     }
-    
-    /////////////////////////////////////////
     
     int begin(bool restart = true)
     {
@@ -295,6 +257,8 @@ class ModemClass
       _debugPrint = &p;
     }
 
+    
+    
     /////////////////////////////////////////
 
     void noDebug()
@@ -304,64 +268,146 @@ class ModemClass
     
     /////////////////////////////////////////
 
-    int autosense(unsigned int timeout = 10000)
+    bool autosense(unsigned int timeout = 10000)
     {
       for (unsigned long start = millis(); (millis() - start) < timeout;) 
       {
-        if (noop() == 1) 
+        if (noop()) 
         {
-          return 1;
+          return true;
         }
 
         delay(100);
       }
 
-      return 0;
+      return false;
     }
     
     /////////////////////////////////////////
 
-    int noop()
+    bool noop()
     {
       send("AT");
 
       return (waitForResponse() == GSM_RESPONSE_OK);
     }
 
+    
+    
     /////////////////////////////////////////
     
-    bool reset()
+#if 1
+
+bool reset()
     {
       //Flush Buffer 
       waitForResponse(1);
-      
-      //Reseting  
-      send("AT+CFUN=16");
-      
-      //Not got OK, error
-      if(!(waitForResponse(5000) ==  GSM_RESPONSE_OK))
-        return(false);
-        
-      //Time to u-blox (lisa u200) send sometimes asyncronous data, without OK,13,10
+
+      //Flush too ?      
       send("AT");
-      delay(3000);	
-      
-      ////Flush Buffer 
+      delay(1000);
       waitForResponse(1);
       
-      //Still Alive
+      //Write too ?      
+      send("AT&W");
+      delay(1000);
+      waitForResponse(1);
+        
+      send("AT+CFUN=0");
+      delay(3000);
+
+      if (!(waitForResponse(10000) ==  GSM_RESPONSE_OK))
+      {
+        GSM_LOGDEBUG(F("reset: AT+CFUN=0 response error"));
+        
+        //return false;
+      }
+
+#if 1
+      send("AT+CFUN=1,1");
+      delay(3000);
+
+      if (!(waitForResponse(3000) ==  GSM_RESPONSE_OK))
+      {
+        GSM_LOGDEBUG(F("reset: AT+CFUN=1,1 response error"));
+        
+        //return false;
+      }
+#endif
+
+      //Flush Buffer 
+      waitForResponse(1);
+
+      send("ATE0");
+      delay(3000);
+      waitForResponse(1);
+      
+      // AT+CMEE: Report Mobile Equipment Error
+      // 0: Disable +CME ERROR: <err> result code and use ERROR instead.
+      // 1: Enable +CME ERROR: <err> result code and use numeric<err>
+      // 2: Enable +CME ERROR: <err> result code and use verbose <err> values
+      //send("AT+CMEE=2");
+      send("AT+CMEE=0");
+      delay(3000);
+      waitForResponse(1);
+      
+      send("AT+GMM");
+      delay(3000);
+      waitForResponse(1000);
+      
+      //Flush Buffer 
+      waitForResponse(1);
+
       send("AT");
-      return (waitForResponse(3000) == GSM_RESPONSE_OK);
+      delay(3000);
+      
+      //Flush Buffer 
+      waitForResponse(1);
+
+#if 1
+      //All right ?, then send a last AT and wait a final OK
+      send("AT");
+
+      //return (waitForResponse(1000) == GSM_RESPONSE_OK);
+      //if (!(waitForResponse(10000) ==  GSM_RESPONSE_OK))
+      {
+        //GSM_LOGDEBUG(F("reset: Last AT response error"));
+        
+        //return false;
+      }
+#endif
+      
+      return true;
     }
+    
+#else    
+
+    int reset()
+    {
+      //send("AT+CFUN=16");
+      // <fun> 0 Minimum functionality
+      // <fun> 1 Full functionality (Default)
+      // <fun> 4 Disable phone both transmit and receive RF circuits.
+      // <rst> Reset the MT before setting it to <fun> power level.
+      send("AT+CFUN=1,1");
+
+      return (waitForResponse(1000) == GSM_RESPONSE_OK);
+    }
+
+#endif
     
     /////////////////////////////////////////
 
     String getModemName() 
-    {    
-#if ( GSM_MODEM_UBLOX || TINY_GSM_MODEM_UBLOX )
-      String name = "u-blox GSM_GPRS";
-#elif ( GSM_MODEM_SARAR4 || TINY_GSM_MODEM_SARAR4 )
-      String name = "u-blox SARA_R4";
+    {
+#if ( GSM_MODEM_SIM800 || TINY_GSM_MODEM_SIM800 )
+      String name = "SIMCom SIM800";
+#elif ( GSM_MODEM_SIM808 || TINY_GSM_MODEM_SIM808 )
+      String name = "SIMCom SIM808";
+#elif ( GSM_MODEM_SIM868 || TINY_GSM_MODEM_SIM868 )
+      String name = "SIMCom SIM868";
+#elif ( GSM_MODEM_SIM900 || TINY_GSM_MODEM_SIM900 )
+      String name = "SIMCom SIM900";
 #else
       String name = "";      
 #endif
@@ -381,8 +427,6 @@ class ModemClass
 
       return modemName;
     }
-    
-    /////////////////////////////////////////
     
     String getModemInfo() 
     {
@@ -441,12 +485,13 @@ class ModemClass
       return 1;
 #endif      
     }
-     
+    
+    
     /////////////////////////////////////////
 
     void closeSocket(int socket)
     {
-      sendf("AT+USOCL=%d", socket);
+      sendf("+CIPCLOSE=%d,1", socket);    // Quick close
     }
     
     /////////////////////////////////////////
@@ -477,6 +522,7 @@ class ModemClass
 
       if (_debugPrint) 
       {
+        _debugPrint->write("\nAT sent:");
         _debugPrint->write(command);
         _debugPrint->write(GSM_NL);
       }
@@ -514,9 +560,10 @@ class ModemClass
       vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
       va_end(ap);
 
-      send(buf);
+      send(buf);      
     }
-        
+    
+    
     /////////////////////////////////////////
 
     int waitForResponse(unsigned long timeout = 100, String* responseDataStorage = NULL)
@@ -530,6 +577,10 @@ class ModemClass
         if (r != GSM_RESPONSE_IDLE) 
         {
           _responseDataStorage = NULL;
+          
+          // KH add
+          _buffer = "";
+          //////
           
           return r;
         }
@@ -571,6 +622,8 @@ class ModemClass
 
     void poll()
     {
+      //GSM_LOGATDEBUG0(F("\npoll: Start\n"));
+      
       while (_uart->available()) 
       {
         char c = _uart->read();
@@ -587,10 +640,11 @@ class ModemClass
           case AT_COMMAND_IDLE:
           default: 
           {
-
               if (_buffer.startsWith("AT") && _buffer.endsWith("\r\n")) 
               {
                 _atCommandState = AT_RECEIVING_RESPONSE;
+                GSM_LOGATDEBUG1(F("poll: Go to AT_RECEIVING_RESPONSE, _buffer = "), _buffer);
+                
                 _buffer = "";
               }  
               else if (_buffer.endsWith("\r\n")) 
@@ -608,9 +662,27 @@ class ModemClass
                       _urcHandlers[i]->handleUrc(_buffer);
                     }
                   }
+                  
+                  GSM_LOGATDEBUG1(F("poll: AT_COMMAND_IDLE, _buffer = "), _buffer);                 
+                  
+                  //KH mod. Receive IMEI data here. How to pass
+                  if (_buffer.endsWith("OK")) 
+                  {
+                    GSM_LOGATDEBUG1(F("poll: Go to AT_COMMAND_IDLE, _buffer = "), _buffer);
+                    _atCommandState = AT_COMMAND_IDLE;
+                    _ready = GSM_RESPONSE_OK;               //1;
+                  }
+                  else
+                  {
+                    GSM_LOGATDEBUG1(F("poll: goto AT_RECEIVING_RESPONSE, _buffer = "), _buffer);
+                    _atCommandState = AT_RECEIVING_RESPONSE;
+                  }
+                  //////
                 }
-
-                _buffer = "";
+                
+                //KH mod. Receive IMEI data here. How to pass
+                //_buffer = "";
+                //
               }
 
               break;
@@ -622,26 +694,34 @@ class ModemClass
               {
                 _lastResponseOrUrcMillis = millis();
 
-                int responseResultIndex = _buffer.lastIndexOf("OK\r\n");
+                int responseResultIndex = _buffer.lastIndexOf("OK\r\n");                
                 
                 if (responseResultIndex != -1) 
                 {
+                  GSM_LOGATDEBUG1(F("poll: AT_RECEIVING_RESPONSE, Got OK. _buffer = "), _buffer);
+                  
+                  // KH add
+                  _atCommandState = AT_COMMAND_IDLE;
+                  //////
                   _ready = GSM_RESPONSE_OK;               //1;
-                } 
+                }
                 else 
                 {
-                  responseResultIndex = _buffer.lastIndexOf("ERROR\r\n");
+                  responseResultIndex = _buffer.lastIndexOf("ERROR\r\n");                  
                   
                   if (responseResultIndex != -1) 
                   {
+                    GSM_LOGATDEBUG1(F("poll: AT_RECEIVING_RESPONSE, ERROR: _buffer = "), _buffer);
+                    
                     _ready = GSM_RESPONSE_ERROR;          //2;
                   } 
                   else 
                   {
                     responseResultIndex = _buffer.lastIndexOf("NO CARRIER\r\n");
-                    
+                                        
                     if (responseResultIndex != -1) 
                     {
+                      GSM_LOGATDEBUG1(F("poll: AT_RECEIVING_RESPONSE, NO CARRIER: _buffer = "), _buffer);
                       _ready = GSM_RESPONSE_NO_CARRIER;   //3;
                     }
                   }
@@ -662,6 +742,8 @@ class ModemClass
                     _buffer.trim();
 
                     *_responseDataStorage = _buffer;
+                    
+                    GSM_LOGATDEBUG1(F("poll: Go to AT_COMMAND_IDLE, _buffer = "), _buffer);
 
                     _responseDataStorage = NULL;
                   }
@@ -677,6 +759,8 @@ class ModemClass
             }
         }
       }
+      
+      //GSM_LOGATDEBUG0(F("\npoll: End\n"));
     }
 
     /////////////////////////////////////////
@@ -726,7 +810,22 @@ class ModemClass
 
     bool setRAT(const char* act) 
     {
-      sendf("AT+URAT=%s", act);
+      //sendf("AT+URAT=%s", act);
+      // AT+CBAND=<op_band> => Get and Set Mobile Operation Band
+      //
+      // EGSM_MODE
+      // PGSM_MODE
+      // DCS_MODE
+      // GSM850_MODE
+      // PCS_MODE
+      // EGSM_DCS_MODE
+      // GSM850_PCS_MODE
+      // EGSM_PCS_MODE
+      // ALL_BAND
+      //sendf("AT+CBAND=%s", act);
+      (void) act;
+      
+      send("AT+CBAND=\"GSM850_MODE\"");
       
       if (waitForResponse(10000) == GSM_RESPONSE_OK) 
       {
@@ -746,13 +845,13 @@ class ModemClass
     {
       String response;
 
-      send("AT+UBANDSEL?");
+      send("AT+CBAND?");
 
       if (waitForResponse(100, &response) == GSM_RESPONSE_OK) 
       {
         GSM_LOGDEBUG1(F("GSMBand::getBand: response = "), response);
         
-        if (response.startsWith("+UBANDSEL: ")) 
+        if (response.startsWith("+CBAND: "))
         {
           response.remove(0, 11);
 
@@ -813,85 +912,30 @@ class ModemClass
     /////////////////////////////////////////
 
     bool setBand(String band)
-    {
-      const char* bands;
-      
+    {     
       GSM_LOGDEBUG1(F("GSMBand::setBand: input band = "), band);
-
-      // Set the Radio Access Technology to support the 1800 MHz frequency
-      // in accord with the bands selected
-      if (band == "DCS_MODE" || band == "EGSM_DCS_MODE" || band == "GSM850_EGSM_DCS_PCS_MODE") 
-      {    
-        setRAT(GSM_BANDS);
-      } 
-      else 
+      
+      // AT+CBAND=<op_band> => Get and Set Mobile Operation Band
+      //
+      // EGSM_MODE
+      // PGSM_MODE
+      // DCS_MODE
+      // GSM850_MODE
+      // PCS_MODE
+      // EGSM_DCS_MODE
+      // GSM850_PCS_MODE
+      // EGSM_PCS_MODE
+      // ALL_BAND
+      //sendf("AT+CBAND=%s", act);
+      send("AT+CBAND=\"GSM850_MODE\"");
+      
+      if (waitForResponse(10000) == GSM_RESPONSE_OK) 
       {
-        setRAT(UMTS_BANDS);
-      }
-
-      if (band == GSM_MODE_EGSM) 
-      {
-        bands = "900";
-      } 
-      else if (band == GSM_MODE_DCS) 
-      {
-        bands = "1800";
-      } 
-      else if (band == GSM_MODE_PCS) 
-      {
-        bands = "1900";
-      } 
-      else if (band == GSM_MODE_EGSM_DCS) 
-      {
-        bands = "900,1800";
-      } 
-      else if (band == GSM_MODE_GSM850_PCS) 
-      {
-        bands = "850,1900";
-      } 
-      else if (band == GSM_MODE_GSM850_EGSM_DCS_PCS) 
-      {
-        bands = "850,900,1800,1900";
-      } 
-      else if (band == GSM_MODE_UMTS) 
-      {
-        bands = "2100";
-      } 
-      else if (band == GSM_MODE_GSM850_EGSM_PCS_UMTS) 
-      {
-        bands = "850,900,1900,2100";
-      } 
-      else 
-      {
-        return false;
+        GSM_LOGDEBUG(F("GSMBand::setBand: OK"));
+        
+        return true;
       }
       
-      GSM_LOGDEBUG1(F("GSMBand::setBand: bands = "), bands);
-
-      for (int i = 0; i < 10; i++) 
-      {
-        sendf("AT+UBANDSEL=%s", bands);
-        int result = waitForResponse(10000);
-
-        if (result == GSM_RESPONSE_OK) 
-        {
-          GSM_LOGDEBUG(F("GSMBand::setBand: OK"));
-          
-          return true;
-        } 
-        else if (result == GSM_RESPONSE_ERROR) 
-        {
-          GSM_LOGDEBUG(F("GSMBand::setBand: failed"));
-          
-          return false;
-        }
-
-        // retry ...
-        delay(100);
-      }
-      
-      GSM_LOGDEBUG(F("GSMBand::setBand: failed after retries"));
-
       return false;
     }
     
@@ -1122,8 +1166,12 @@ class ModemClass
     {
       if (_state == GSM_READY) 
       {
-        send("AT+CPWROFF");
+        String response;
+        
+        //send("AT+CPWROFF");       
+        send("AT+CPOWD=1");
         waitForResponse(40000);
+
       }
       
       end();
@@ -1277,7 +1325,8 @@ class ModemClass
 
         case READY_STATE_SET_AUTOMATIC_TIME_ZONE: 
           {
-            send("AT+CTZU=1");
+            //send("AT+CTZU=1");
+            send("AT+CLTS=1");
             _gsmData._readyState = READY_STATE_WAIT_SET_AUTOMATIC_TIME_ZONE_RESPONSE;
             modemReady = GSM_RESPONSE_IDLE;
             
@@ -1897,7 +1946,8 @@ class ModemClass
     
     void setSampleRate(int sampleRateNumber)
     {
-      sendf("AT+UI2S=11,1,0,%d,1", sampleRateNumber);
+      (void) sampleRateNumber;
+      //sendf("AT+UI2S=11,1,0,%d,1", sampleRateNumber);
     }
     
     void enableAudioPathNoHeadset()
@@ -1905,7 +1955,7 @@ class ModemClass
       // enable
       // Audio path mode setting +USPM
       // <main_uplink>, <main_downlink>, <alert_sound>, <headset_indication>, <vmic_ctrl>
-      send("AT+USPM=1,1,0,0,2");
+      //send("AT+USPM=1,1,0,0,2");
     }
     
     void disableAudioPathNoHeadset()
@@ -1913,7 +1963,7 @@ class ModemClass
       // disable
       // Audio path mode setting +USPM
       // <main_uplink>, <main_downlink>, <alert_sound>, <headset_indication>, <vmic_ctrl>
-      send("AT+USPM=255,255,0,0,2");
+      //send("AT+USPM=255,255,0,0,2");
     }
     
     void setDTMF(char c)
@@ -1928,7 +1978,8 @@ class ModemClass
     
     void readSocketData(int socket, int size)
     {
-      sendf("AT+USORD=%d,%d", socket, size);
+      //sendf("AT+USORD=%d,%d", socket, size);
+      sendf("AT+CIPRXGET=2,%d,%d", socket, size);
     }
     
     int availableSocketBuffer(int socket, SocketBufferList& buffers)
@@ -1954,7 +2005,7 @@ class ModemClass
           return -1;
         }
 
-        if (!response.startsWith("+USORD: ")) 
+        if (!response.startsWith("+CIPRXGET: ")) 
         {
           return 0;
         }
@@ -1988,39 +2039,33 @@ class ModemClass
     //From GSMModem_Generic_Impl.hpp
     
     String getIMEI()
-    {
+    {  
       String imei;
 
       imei.reserve(15);
 
-      send("AT+CGSN");
-      waitForResponse(100, &imei);
+      send("AT+GSN");
+      waitForResponse(100, &imei);     
 
-      return imei;
+      return imei;    
     }
 
     String getICCID()
     {
       String iccid;
 
-      iccid.reserve(7 + 20);
+      iccid.reserve(30);
 
       send("AT+CCID");
       waitForResponse(1000, &iccid);
 
-      if (iccid.startsWith("+CCID: ")) 
-      {
-        iccid.remove(0, 7);
-      } 
-      else 
-      {
-        iccid = "";
-      }
+      // Trim out the CCID header in case it is there
+      //iccid.replace("CCID:", "");
+      //iccid.trim();
 
       return iccid;
     }
     
-    // Asks for International Mobile Subscriber Identity IMSI via the AT+CIMI
     // Asks for International Mobile Subscriber Identity IMSI via the AT+CIMI
     String getIMSI()
     {
@@ -2032,14 +2077,42 @@ class ModemClass
       waitForResponse(1000, &imsi);
 
       // Trim out the imsi header in case it is there
-      imsi.replace("CIMI:", "");
-      imsi.trim();
+      //imsi.replace("CIMI:", "");
+      //imsi.trim();
 
       return imsi;
     }
         
     /////////////////////////////////////////
 
+  private:
+
+#if ( GSM_USE_SAMD || GSM_USE_NRF528XX )
+    Uart* _uart; 
+#else
+    HardwareSerial*   _uart;
+#endif
+
+    unsigned long _baud;
+    
+    int _resetPin;     
+    int _dtrPin;
+    bool _lowPowerMode;
+
+    unsigned long _lastResponseOrUrcMillis;
+
+    enum 
+    {
+      AT_COMMAND_IDLE,
+      AT_RECEIVING_RESPONSE
+    } _atCommandState;
+    
+    int _ready;
+    String _buffer;
+    String* _responseDataStorage;
+
+    static ModemUrcHandler* _urcHandlers[MAX_URC_HANDLERS];
+    static Print* _debugPrint;
 };
 
 //////////////////////////////////////////////////////
@@ -2060,9 +2133,9 @@ Print* ModemClass::_debugPrint = NULL;
 
 //////////////////////////////////////////////////////
 
-#include "Modem_SaraR4_Extra_Generic.h"
+#include "Modem_SIM800_Extra_Generic.h"
 
 
 //////////////////////////////////////////////////////
 
-#endif    // _MODEM_SARA_R4_INCLUDED_H
+#endif    // _MODEM_SIM800_INCLUDED_H

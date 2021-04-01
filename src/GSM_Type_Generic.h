@@ -18,11 +18,12 @@
   You should have received a copy of the GNU General Public License along with this program.
   If not, see <https://www.gnu.org/licenses/>.  
  
-  Version: 1.2.4
+  Version: 1.3.0
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   1.2.4    K Hoang     11/03/2021 Initial public release to add support to many boards / modules besides MKRGSM 1400 / SARA U201
+  1.3.0    K Hoang     31/03/2021 Add ThingStream MQTTS support. Fix SMS receive bug.
  **********************************************************************************************************************************/
 
 #pragma once
@@ -34,6 +35,8 @@
 //Global functions and declarations
 
 #include <time.h>
+
+#define GSM_UNUSED(var)     ((void) var)
 
 extern "C" 
 {
@@ -53,6 +56,25 @@ byte charToInt(byte input)
   
   return input;
 }
+
+////////////////////////////////////////////////////// 
+
+String substringAfterSymbol(String str, char symbol)
+{
+  return( str.substring(str.indexOf(symbol) + 1) );
+}
+
+////////////////////////////////////////////////////// 
+
+String substringBeforeSymbol(String str, char symbol)
+{     
+  return( str.substring(0, str.indexOf(symbol) ) );
+}
+
+////////////////////////////////////////////////////// 
+
+
+#define GSM_NL "\r\n"
 
 ///////////////////////////////////////////////////////////////
 // Originally from Modem_???_Generic.h
@@ -163,6 +185,8 @@ enum
   GPRS_STATE_WAIT_ATTACH_GPRS_RESPONSE,
   GPRS_STATE_SET_MULTI_IP,
   GPRS_STATE_WAIT_SET_MULTI_IP_RESPONSE,
+  GPRS_STATE_QUICK_SEND,
+  GPRS_STATE_WAIT_QUICK_SEND_RESPONSE,
   GPRS_STATE_START_TASK,
   GPRS_STATE_WAIT_START_TASK_RESPONSE,
   GPRS_STATE_WIRELESS_UP,
@@ -261,11 +285,11 @@ enum
 
 typedef struct
 {
-  bool    synch;
-  int     state;
-  int     smsDataIndex;
-  int     smsDataEndIndex;
-  bool    smsTxActive;
+  bool      synch;
+  int       state;
+  int       smsDataIndex;
+  int       smsDataEndIndex;
+  bool      smsTxActive;
 } GSM_SMS_Data;
 
 // Originally from GSM_SSLClient_Generic_Impl.hpp

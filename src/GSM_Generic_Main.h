@@ -18,11 +18,12 @@
   You should have received a copy of the GNU General Public License along with this program.
   If not, see <https://www.gnu.org/licenses/>.  
  
-  Version: 1.2.4
+  Version: 1.3.0
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   1.2.4    K Hoang     11/03/2021 Initial public release to add support to many boards / modules besides MKRGSM 1400 / SARA U201
+  1.3.0    K Hoang     31/03/2021 Add ThingStream MQTTS support. Fix SMS receive bug.
  **********************************************************************************************************************************/
 
 #pragma once
@@ -30,7 +31,7 @@
 #ifndef _MKRGSM_H_INCLUDED
 #define _MKRGSM_H_INCLUDED
 
-#define GSM_GENERIC_VERSION     "GSM_Generic v1.2.4"
+#define GSM_GENERIC_VERSION     "GSM_Generic v1.3.0"
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -47,7 +48,7 @@
   #warning Using GSM_MODEM_SARAR4
   #include "Modems/Modem_SaraR4_Generic.h"
 #elif ( GSM_MODEM_SIM800 || TINY_GSM_MODEM_SIM800 )
-  #error Using GSM_MODEM_SIM800 not supported yet
+  //#error Using GSM_MODEM_SIM800 not supported yet
   #warning Using GSM_MODEM_SIM800
   #warning Using GSM_MODEM_SIM800
   #include "Modems/Modem_SIM800_Generic.h"  
@@ -58,7 +59,7 @@
   #error Using GSM_MODEM_SIM868 not supported yet
   #include "Modems/Modem_SIM868_Generic.h"  
 #elif ( GSM_MODEM_SIM900 || TINY_GSM_MODEM_SIM900 )
-  #error Using GSM_MODEM_SIM900 not supported yet
+  //#error Using GSM_MODEM_SIM900 not supported yet
   #warning Using GSM_MODEM_SIM900
   #include "Modems/Modem_SIM800_Generic.h"   
 #elif ( GSM_MODEM_SIM5300 || TINY_GSM_MODEM_SIM5300 )

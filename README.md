@@ -18,6 +18,7 @@
   * [To be Supported modems](#to-be-supported-modems)
   * [Currently supported Boards](#currently-supported-boards)
 * [Changelog](#changelog)
+  * [Malor Release v1.3.0](#major-release-v130)
   * [Release v1.2.4](#release-v124)
 * [Prerequisites](#prerequisites)
 * [Installation](#installation)
@@ -55,6 +56,8 @@
   * [1. How to select which GSM/GPRS module to use](#1-how-to-select-which-gsmgprs-module-to-use)
   * [2. How to select which Serial port to communicate to GSM module](#2-how-to-select-which-serial-port-to-communicate-to-gsm-module)
   * [3. How to select extra pins to control GSM module](#3-how-to-select-extra-pins-to-control-gsm-module)
+  * [4. How to select baudRate to communicate with GSM module](#4-how-to-select-baudrate-to-communicate-with-gsm-module)
+  * [5. How to load or not load SSL Root Certs onto GSM module NVM](#5-how-to-load-or-not-load-ssl-root-certs-onto-gsm-module-nvm)
 * [Examples](#examples)
   * [ 1. GPRSPing](examples/GPRSPing)
   * [ 2. GPRSUdpNtpClient](examples/GPRSUdpNtpClient)
@@ -89,8 +92,9 @@
       * [28. GSM_MQTTClient_Basic](examples/Advanced/GSM_MQTTClient_Basic)
       * [29. GSM_MQTT_Medium](examples/Advanced/GSM_MQTT_Medium)
       * [30. GSM_MQTT_ThingStream](examples/Advanced/GSM_MQTT_ThingStream)
+      * [31. GSM_MQTTS_ThingStream](examples/Advanced/GSM_MQTTS_ThingStream)
     * [Blynk](#blynk)
-      * [31. GSM_Blynk](examples/Advanced/GSM_Blynk)
+      * [32. GSM_Blynk](examples/Advanced/GSM_Blynk)
 * [Example GSMWebClient](#example-gsmwebclient)
   * [1. File GSMWebClient.ino](#1-file-gsmwebclientino)
   * [2. File defines.h](#2-file-definesh)
@@ -122,7 +126,7 @@ to add support to many boards besides `Arduino MKR GSM 1400`.
 
 This [GSM_Generic library](https://github.com/khoih-prog/GSM_Generic) will finally provide these following features (certainly ony if supported by the GSM/GPRS modules)
 
-1. **TCP Client and Server** (HTTP, **HTTPS**, MQTT, Blynk, WebSockets, ...)
+1. **TCP Client and Server** (HTTP, **HTTPS**, MQTT, **MQTTS**, Blynk, WebSockets, ...)
 2. **UDP** data connections
 4. **USSD** (Sending USSD requests and decoding 7,8,16-bit responses)
 5. **SMS** (Sending and Receiving)
@@ -132,7 +136,7 @@ This [GSM_Generic library](https://github.com/khoih-prog/GSM_Generic) will final
 
 ### Supported modems
 
-- [X] u-blox 2G, 3G, 4G, and LTE Cat1 Cellular Modems (many modules including LEON-G100, LISA-U2xx, SARA-G3xx, SARA-U2xx, TOBY-L2xx, LARA-R2xx, MPCI-L2xx)
+- [X] u-blox 2G, 3G, 4G, and LTE Cat1 Cellular Modems (many modules including LEON-G100, **LISA-U2xx, SARA-G3xx, SARA-U2xx**, TOBY-L2xx, LARA-R2xx, MPCI-L2xx)
 - [X] u-blox LTE-M/NB-IoT Modems (SARA-R4xx, SARA-N4xx, _but NOT SARA-N2xx_). Not fully tested yet.
 
 ### To be Supported modems
@@ -207,6 +211,16 @@ This [**GSM_Generic** library](https://github.com/khoih-prog/GSM_Generic) curren
 ---
 
 ## Changelog
+
+### Malor Release v1.3.0
+
+1. Fix SMS receive bug.
+2. Add option to load Root Certs only when necessary for SSL.
+3. Add ThingStream MQTT(S) support and example.
+4. Add UDP functions to permit specify host
+5. Add GSM_LOGATDEBUG macro to help debug AT-command related functions
+6. Add support to SoftwareSerial
+7. Fully tested on **u-blox SARA-G350 modem and nRF52-based NINA_B302_ublox board**
 
 ### Release v1.2.4
 
@@ -1388,6 +1402,59 @@ Default `GSM_RESETN` pin is set as 10, and `GSM_DTR` as 11. You can override the
 Depending on the GSM module, the pins' requirements are different. 
 Please follow the instructions for the related GSM module.
 
+#### 4. How to select baudRate to communicate with GSM module
+
+1. For GSM
+
+```
+// BaudRate to communicate to GSM/GPRS modem. If be limit to max 115200 inside modem
+unsigned long baudRateSerialGSM  = 115200;
+
+GSM gsmAccess;
+
+gsmAccess.begin(baudRateSerialGSM, PINNUMBER);
+```
+
+2. For GSMModem
+
+```
+// BaudRate to communicate to GSM/GPRS modem. If be limit to max 115200 inside modem
+unsigned long baudRateSerialGSM  = 115200;
+
+GSMModem gsmModem;
+
+gsmModem.begin(baudRateSerialGSM);
+```
+
+#### 5. How to load or not load SSL Root Certs onto GSM module NVM
+
+The function prototype for SSL connect() functions are
+
+```
+virtual int connect(IPAddress ip, uint16_t port, bool loadRootCert = false);
+virtual int connect(const char* host, uint16_t port, bool loadRootCert = false);
+```
+
+1. To load Root Certs onto modem NVM (**non-volatile memory**), you have to call connect() with (loadRootCert == true)
+
+This is necessary only once. The Root Certs will be stored in modem NVM
+
+```
+GSMSSLClient gsmClient;
+
+gsmClient.connect(MQTT_SERVER, MQTT_PORT, true);
+```
+
+2. To not load Root Certs onto modem NVM, you have to call connect() without third parameter => (loadRootCert == false)
+
+This is done to save loading time because the Root Certs have been be previously stored in modem NVM.
+
+```
+GSMSSLClient gsmClient;
+
+gsmClient.connect(MQTT_SERVER, MQTT_PORT);
+```
+
 
 ---
 ---
@@ -1432,10 +1499,11 @@ Please follow the instructions for the related GSM module.
 28. [GSM_MQTTClient_Basic](examples/Advanced/GSM_MQTTClient_Basic)
 29. [GSM_MQTT_Medium](examples/Advanced/GSM_MQTT_Medium)
 30. [GSM_MQTT_ThingStream](examples/Advanced/GSM_MQTT_ThingStream)
+31. [GSM_MQTTS_ThingStream](examples/Advanced/GSM_MQTTS_ThingStream)
 
 #### Blynk
 
-31. [GSM_Blynk](examples/Advanced/GSM_Blynk)
+32. [GSM_Blynk](examples/Advanced/GSM_Blynk)
 
 ---
 ---
@@ -1461,8 +1529,8 @@ GPRS gprs;
 GSM gsmAccess;
 
 // URL, path and port (for example: example.org)
-char server[] = "example.org";
-char path[]   = "/";
+char server[] = "arduino.cc";         //"example.org";
+char path[]   = "/asciilogo.txt";     //"/";
 int port      = 80; // port 80 is the default for HTTP
 
 // BaudRate to communicate to GSM/GPRS modem. If be limit to max 115200 inside modem
@@ -1478,6 +1546,10 @@ void setup()
 
   Serial.print(F("\nStarting GSMWebClient on ")); Serial.println(BOARD_NAME);
   Serial.println(GSM_GENERIC_VERSION);
+
+#if ( defined(DEBUG_GSM_GENERIC_PORT) && (_GSM_GENERIC_LOGLEVEL_ > 4) )
+  MODEM.debug(DEBUG_GSM_GENERIC_PORT);
+#endif  
 
   // connection state
   bool connected = false;
@@ -1505,6 +1577,18 @@ void setup()
   {
     Serial.println("connected");
     // Make a HTTP request:
+    delay(2000);
+    
+ #if 1
+    
+    String command = "GET /asciilogo.txt HTTP/1.1\r\nHost: arduino.cc\r\nConnection: close\r\n";
+    //String command = "GET /asciilogo.txt HTTP/1.1\nHost: arduino.cc\nConnection: close";
+    client.println(command);
+    //client.println(F("GET /asciilogo.txt HTTP/1.1"));
+    //client.println(F("Host: arduino.cc"));
+    //client.println(F("Connection: close"));
+    //client.println();
+ #else
     client.print("GET ");
     client.print(path);
     client.println(" HTTP/1.1");
@@ -1512,6 +1596,7 @@ void setup()
     client.println(server);
     client.println("Connection: close");
     client.println();
+ #endif   
   } 
   else 
   {
@@ -1538,7 +1623,8 @@ void loop()
     client.stop();
 
     // do nothing forevermore:
-    while(true);
+    //while(true);
+    delay(1000);
   }
 }
 ```
@@ -1553,17 +1639,17 @@ void loop()
 
 #define DEBUG_GSM_GENERIC_PORT       Serial
 
-// Debug Level from 0 to 4
-#define _GSM_GENERIC_LOGLEVEL_       4
+// Debug Level from 0 to 5. Level 5 is to print out AT commands and responses
+#define _GSM_GENERIC_LOGLEVEL_       5
 
 #define SECRET_PINNUMBER     ""
-#define SECRET_GPRS_APN      "GPRS_APN" // replace your GPRS APN
-#define SECRET_GPRS_LOGIN    "login"    // replace with your GPRS login
-#define SECRET_GPRS_PASSWORD "password" // replace with your GPRS password
-
-#if ( defined(ARDUINO_NUCLEO_F767ZI) || defined(ARDUINO_NUCLEO_L053R8) )
-  HardwareSerial Serial1(D0, D1);   // (PA3, PA2) for ARDUINO_NUCLEO_L053R8
-#endif
+//#define SECRET_GPRS_APN      "GPRS_APN"                   // replace your GPRS APN
+//#define SECRET_GPRS_APN      "rogers-core-appl1.apn"      // replace your GPRS APN
+//#define SECRET_GPRS_APN      "Fido-core-appl1.apn";       // FIDO APN
+//#define SECRET_GPRS_APN      "LTEMOBILE.APN";             // FIDO LTE APN
+#define SECRET_GPRS_APN      "ltedata.apn";                 // FIDO LTE APN
+#define SECRET_GPRS_LOGIN    ""                             // replace with your GPRS login
+#define SECRET_GPRS_PASSWORD ""                             // replace with your GPRS password
 
 //////////////////////////////////////////////
 
@@ -1573,15 +1659,32 @@ void loop()
   #define GSM_RESETN  (10u)
   #define GSM_DTR     (11u)
 
-  #if !ESP8266
-    #define SerialGSM   Serial1
+  #if ESP8266
+    // Using Software Serial for ESP8266, as Serial1 is TX only
+    #define GSM_USING_SOFTWARE_SERIAL     true
   #else
-    #warning Using default SerialGSM = Serial => can not use Serial for Debug Terminal
-
-    #define SerialGSM   Serial
+    // Optional Software Serial here for other boards, but not advised if HW Serial available
+    #define GSM_USING_SOFTWARE_SERIAL     false
   #endif
+   
+  #if GSM_USING_SOFTWARE_SERIAL
+    #warning Using default SerialGSM = SoftwareSerial
+    
+    #define D8 (15)
+    #define D7 (13)
+    
+    #include <SoftwareSerial.h>
+    
+    SoftwareSerial swSerial(D7, D8);    // (D7, D8, false, 256); // (RX, TX, false, 256);
+    
+    #define SerialGSM   swSerial
+  #else
+    #warning Using default SerialGSM = HardwareSerial Serial1
+    #define SerialGSM   Serial1
+  #endif    // GSM_USING_SOFTWARE_SERIAL
 
   #warning You must connect the Modem correctly and modify the pins / Serial port here
+  
 #endif
 
 //////////////////////////////////////////////
@@ -1601,7 +1704,7 @@ void loop()
 #define GSM_MODEM_SIM800            false
 #define GSM_MODEM_SIM808            false
 #define GSM_MODEM_SIM868            false
-#define GSM_MODEM_SIM900            false
+#define GSM_MODEM_SIM900            true
 #define GSM_MODEM_SIM5300           false
 #define GSM_MODEM_SIM5320           false
 #define GSM_MODEM_SIM5360           false
@@ -1639,7 +1742,7 @@ Check [**NINA B302 ACCESSING BLYNK VIA GSM - SARA G350**](https://nina-gsm.blogs
 
 ```
 Start GSM_Blynk on NINA_B302_ublox
-GSM_Generic v1.2.4
+GSM_Generic v1.3.0
 [2485] 
     ___ __ __
    / _) / / _ _____ / / __
@@ -1680,11 +1783,14 @@ nect: host = blynk-cloud.com, port = 8080
 [GSM] GSMClient :: connected: OK
 ```
 
-#### 2. GSM_MQTT_ThingStream on NINA_B302_ublox with u-blox LISA-U201 GSM_GPRS modem
+#### 2. GSM_MQTT_ThingStream on NINA_B302_ublox with u-blox SARA-G350 GSM_GPRS modem
 
 Check [**U-BLOX NINA B302 + GSM ACCESSING THINGSTREAM.IO**](https://nina-gsm.blogspot.com/2021/03/u-blox-nina-e-rede-gsm-o-objetivo-deste.html)
 
 
+#### 3. GSM_MQTTS_ThingStream on NINA_B302_ublox with u-blox SARA-G350 GSM_GPRS modem
+
+Check [**U-BLOX NINA B302 + GSM ACCESSING THINGSTREAM.IO (SSL)**](https://nina-b302-wifi-mqtt.blogspot.com/2021/03/u-blox-nina-b302-gsm-acessando_30.html)
 
 ---
 ---
@@ -1714,6 +1820,16 @@ Sometimes, the library will only work if you update the board core to the newer 
 ---
 
 ## Releases
+
+### Malor Release v1.3.0
+
+1. Fix SMS receive bug.
+2. Add option to load Root Certs only when necessary for SSL.
+3. Add ThingStream MQTT(S) support and example.
+4. Add UDP functions to permit specify host
+5. Add GSM_LOGATDEBUG macro to help debug AT-command related functions
+6. Add support to SoftwareSerial
+7. Fully tested on **u-blox SARA-G350 modem and nRF52-based NINA_B302_ublox board**
 
 ### Release v1.2.4
 
@@ -1745,6 +1861,7 @@ Submit issues to: [**GSM_Generic issues**](https://github.com/khoih-prog/GSM_Gen
  7. Add support to **Seeeduino SAMD21/SAMD51 boards (SEEED_WIO_TERMINAL, SEEED_FEMTO_M0, SEEED_XIAO_M0, Wio_Lite_MG126, WIO_GPS_BOARD, SEEEDUINO_ZERO, SEEEDUINO_LORAWAN, SEEED_GROVE_UI_WIRELESS, etc.)**
  8. Add support to ESP32 (including ESP32-S2) and ESP8266 (only using Hardware Serial)
  9. Support u-blox Sara U201 GSM/GPRS module
+10. Support u-blox Sara G3xx GSM/GPRS module
 
 
 ---
@@ -1754,11 +1871,13 @@ Submit issues to: [**GSM_Generic issues**](https://github.com/khoih-prog/GSM_Gen
 
 1. Based on and modified from from [Arduino **MKRGSM** library](https://github.com/arduino-libraries/MKRGSM).Thanks to the great works of these [MKRGSM Library's Contributors](https://github.com/arduino-libraries/MKRGSM/graphs/contributors)
 2. Thanks to good work of [Miguel Wisintainer](https://github.com/tcpipchip) for initiating, inspriring, working with, developing, debugging, testing and maintaining.
+3. Thanks to [avonree](https://github.com/avonree) to report bug in [SMS can send OUT but not receive #2](https://github.com/khoih-prog/GSM_Generic/issues/2) which was fixed in v1.3.0.
 
 
 <table>
   <tr>
     <td align="center"><a href="https://github.com/tcpipchip"><img src="https://github.com/tcpipchip.png" width="100px;" alt="tcpipchip"/><br /><sub><b>⭐️ Miguel Wisintainer</b></sub></a><br /></td>
+    <td align="center"><a href="https://github.com/avonree"><img src="https://github.com/avonree.png" width="100px;" alt="avonree"/><br /><sub><b>avonree</b></sub></a><br /></td>
   </tr> 
 </table>
 

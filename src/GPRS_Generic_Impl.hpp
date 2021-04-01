@@ -18,11 +18,12 @@
   You should have received a copy of the GNU General Public License along with this program.
   If not, see <https://www.gnu.org/licenses/>.  
  
-  Version: 1.2.4
+  Version: 1.3.0
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   1.2.4    K Hoang     11/03/2021 Initial public release to add support to many boards / modules besides MKRGSM 1400 / SARA U201
+  1.3.0    K Hoang     31/03/2021 Add ThingStream MQTTS support. Fix SMS receive bug.
  **********************************************************************************************************************************/
 
 #pragma once
@@ -62,7 +63,7 @@ GSM3_NetworkStatus_t GPRS::attachGPRS(const char* apn, const char* user_name, co
   {
     unsigned long start = millis();
 
-    while (ready() == 0)
+    while (ready() == GSM_RESPONSE_IDLE)
     {
       if (_timeout && !((millis() - start) < _timeout))
       {
@@ -87,7 +88,7 @@ GSM3_NetworkStatus_t GPRS::detachGPRS(bool synchronous)
 
   if (synchronous)
   {
-    while (ready() == 0)
+    while (ready() == GSM_RESPONSE_IDLE)
     {
       delay(100);
     }
@@ -107,7 +108,7 @@ void GPRS::setTimeout(unsigned long timeout)
 
 int GPRS::ping(const String &hostname, uint8_t ttl)
 {
-  return ping(hostname.c_str(), ttl);
+  return GPRS_ModemUrcHandler::ping(hostname.c_str(), ttl);
 }
 
 int GPRS::ping(IPAddress ip, uint8_t ttl)

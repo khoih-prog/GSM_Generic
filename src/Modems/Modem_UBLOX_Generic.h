@@ -18,11 +18,12 @@
   You should have received a copy of the GNU General Public License along with this program.
   If not, see <https://www.gnu.org/licenses/>.  
  
-  Version: 1.2.4
+  Version: 1.3.0
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   1.2.4    K Hoang     11/03/2021 Initial public release to add support to many boards / modules besides MKRGSM 1400 / SARA U201
+  1.3.0    K Hoang     31/03/2021 Add ThingStream MQTTS support. Fix SMS receive bug.
  **********************************************************************************************************************************/
 
 #pragma once
@@ -46,6 +47,8 @@
 
 #elif ( GSM_USE_SAM_DUE )
   #define Uart      UARTClass
+#elif ( GSM_USING_SOFTWARE_SERIAL )
+  #define Uart      SoftwareSerial
 #else
   #define Uart      HardwareSerial
 #endif
@@ -78,6 +81,39 @@ class ModemUrcHandler
 
 class ModemClass 
 {
+  /////////////////////////////////////////
+
+  private:
+
+#if ( GSM_USE_SAMD || GSM_USE_NRF528XX )
+    Uart* _uart;
+#elif ( GSM_USING_SOFTWARE_SERIAL )
+    SoftwareSerial*   _uart;
+#else
+    HardwareSerial*   _uart;
+#endif
+    
+    unsigned long _baud;
+    
+    int _resetPin;     
+    int _dtrPin;
+    bool _lowPowerMode;
+
+    unsigned long _lastResponseOrUrcMillis;
+
+    enum 
+    {
+      AT_COMMAND_IDLE,
+      AT_RECEIVING_RESPONSE
+    } _atCommandState;
+    
+    int _ready;
+    String _buffer;
+    String* _responseDataStorage;
+
+    static ModemUrcHandler* _urcHandlers[MAX_URC_HANDLERS];
+    static Print* _debugPrint;
+    
   public:
   
 
@@ -95,11 +131,13 @@ class ModemClass
       _buffer.reserve(64);
     }
     
-    
     /////////////////////////////////////////
     
     int begin(unsigned long baud, bool restart = true)
     {
+      (void) restart;
+      
+#if UBLOX_USING_SET_BAUD
       bool newBaud = false;
       
       if (_baud != baud)
@@ -107,6 +145,13 @@ class ModemClass
         _baud = ( baud > 115200 ? 115200 : baud );
         newBaud = true;
       }
+#else    
+         
+      if (_baud != baud)
+      {
+        _baud = ( baud > 115200 ? 115200 : baud );
+      }
+#endif
         
       GSM_LOGDEBUG1(F("begin: UART baud = "), _baud);  
       
@@ -157,10 +202,13 @@ class ModemClass
         return GSM_MODEM_START_ERROR;
       }
       
+#if UBLOX_USING_SET_BAUD
+  
       GSM_LOGDEBUG(F("begin: Check baud"));
 
       // KH, must always set baud here
-      //if (_baud > 115200)
+      // u-blox SARA and LISA can auto=adjust baurate, and we don't need to set baud
+      // unless UBLOX_USING_SET_BAUD is turned ON if modem don't have this auto feature
       if ( restart || newBaud )
       {
         GSM_LOGDEBUG1(F("begin: Set baud = "), _baud);
@@ -183,6 +231,8 @@ class ModemClass
           return GSM_MODEM_START_ERROR;
         }
       }
+      
+#endif
 
 #if UBLOX_USING_LOW_POWER_MODE 
       if (_dtrPin > -1) 
@@ -204,6 +254,8 @@ class ModemClass
 
       return GSM_MODEM_START_OK;
     }
+    
+    /////////////////////////////////////////
     
     int begin(bool restart = true)
     {
@@ -243,8 +295,6 @@ class ModemClass
       _debugPrint = &p;
     }
 
-    
-    
     /////////////////////////////////////////
 
     void noDebug()
@@ -278,51 +328,77 @@ class ModemClass
       return (waitForResponse() == GSM_RESPONSE_OK);
     }
 
-    
-    
     /////////////////////////////////////////
-
+    
     bool reset()
     {
       //Flush Buffer 
       waitForResponse(1);
-
-      //Flush too ?      
-      send("AT");
-      delay(1000);
-      waitForResponse(1);
-        
+      
+      //Reseting  
       send("AT+CFUN=16");
-      delay(3000);
-
-      if (!(waitForResponse(3000) ==  GSM_RESPONSE_OK))
-          return false;
-
-      //Flush Buffer 
-      waitForResponse(1);
-
-      //During AT send, U-blox LISA U200 send some asyncronous data...
-      send("AT");
-      delay(3000);
       
-      //Flush Buffer 
-      waitForResponse(1);
-
+      //Not got OK, error
+      if(!(waitForResponse(5000) ==  GSM_RESPONSE_OK))
+        return(false);
+        
+      //Time to u-blox (lisa u200) send sometimes asyncronous data, without OK,13,10
       send("AT");
-      delay(3000);
+      delay(3000);	
       
-      //Flush Buffer 
+      ////Flush Buffer 
       waitForResponse(1);
       
-      //All right ?, then send a last AT and wait a final OK
+      //Still Alive
       send("AT");
-
-      return (waitForResponse(1000) == GSM_RESPONSE_OK);
+      return (waitForResponse(3000) == GSM_RESPONSE_OK);
     }
     
     /////////////////////////////////////////
 
+    String getModemName() 
+    {    
+#if ( GSM_MODEM_UBLOX || TINY_GSM_MODEM_UBLOX )
+      String name = "u-blox GSM_GPRS";
+#elif ( GSM_MODEM_SARAR4 || TINY_GSM_MODEM_SARAR4 )
+      String name = "u-blox SARA_R4";
+#else
+      String name = "";      
+#endif
 
+      send("AT+GMM");
+      
+      String modemName;
+      modemName.reserve(48);
+      
+      if ( waitForResponse(100, &modemName) != GSM_RESPONSE_OK) 
+      { 
+        //GSM_LOGDEBUG1("### Modem Name :", name);
+        return name; 
+      }
+      
+      //GSM_LOGDEBUG1("### Modem Name :", modemName);
+
+      return modemName;
+    }
+    
+    /////////////////////////////////////////
+    
+    String getModemInfo() 
+    {
+      send("ATI");
+      
+      String modemInfo;
+      modemInfo.reserve(48);
+      
+      waitForResponse(100, &modemInfo);
+      
+      //GSM_LOGDEBUG1("### Modem Info :", modemInfo);
+
+      return modemInfo;
+    }
+   
+    /////////////////////////////////////////
 
     int lowPowerMode()
     {
@@ -365,8 +441,7 @@ class ModemClass
       return 1;
 #endif      
     }
-    
-    
+     
     /////////////////////////////////////////
 
     void closeSocket(int socket)
@@ -399,6 +474,12 @@ class ModemClass
         delay(5);
       }
 #endif
+
+      if (_debugPrint) 
+      {
+        _debugPrint->write(command);
+        _debugPrint->write(GSM_NL);
+      }
 
       // compare the time of the last response or URC and ensure
       // at least 20ms have passed before sending a new command
@@ -435,8 +516,7 @@ class ModemClass
 
       send(buf);
     }
-    
-    
+        
     /////////////////////////////////////////
 
     int waitForResponse(unsigned long timeout = 100, String* responseDataStorage = NULL)
@@ -1666,7 +1746,46 @@ class ModemClass
       sendf("AT+CMGD=%s", index);
     }
     
-    int availableSMS(GSM_SMS_Data& _smsData, String&_incomingBuffer)
+    int readySMS(GSM_SMS_Data& _smsData, String& _incomingBuffer)
+    {
+      int readySMS = ready();
+
+      if (readySMS == 0)
+      {
+        return 0;
+      }
+
+      switch (_smsData.state)
+      {
+        case SMS_STATE_IDLE:
+        default:
+          {
+            break;
+          }
+
+        case SMS_STATE_LIST_MESSAGES:
+          {
+            setResponseDataStorage(&_incomingBuffer);
+            
+            // List message +CMGL => received unread SMS messages
+            receivedUnreadSMS();
+            
+            _smsData.state = SMS_STATE_WAIT_LIST_MESSAGES_RESPONSE;
+            readySMS = 0;
+            break;
+          }
+
+        case SMS_STATE_WAIT_LIST_MESSAGES_RESPONSE:
+          {
+            _smsData.state = SMS_STATE_IDLE;
+            break;
+          }
+      }
+
+      return readySMS;
+    }
+    
+    int availableSMS(GSM_SMS_Data& _smsData, String& _incomingBuffer)
     {
       if (_incomingBuffer.length() != 0) 
       {
@@ -1693,14 +1812,14 @@ class ModemClass
 
         if (_smsData.synch) 
         {
-          while ((r = ready()) == 0) 
+          while ((r = readySMS(_smsData, _incomingBuffer)) == 0)
           {
             delay(100);
           }
         } 
         else 
         {
-          r = ready();
+          r = readySMS(_smsData, _incomingBuffer);
         }
 
         if (r != 1) 
@@ -1900,37 +2019,27 @@ class ModemClass
 
       return iccid;
     }
+    
+    // Asks for International Mobile Subscriber Identity IMSI via the AT+CIMI
+    // Asks for International Mobile Subscriber Identity IMSI via the AT+CIMI
+    String getIMSI()
+    {
+      String imsi;
+
+      imsi.reserve(30);
+
+      send("AT+CIMI");
+      waitForResponse(1000, &imsi);
+
+      // Trim out the imsi header in case it is there
+      imsi.replace("CIMI:", "");
+      imsi.trim();
+
+      return imsi;
+    }
         
     /////////////////////////////////////////
 
-  private:
-
-#if ( GSM_USE_SAMD || GSM_USE_NRF528XX )
-    Uart* _uart;
-#else
-    HardwareSerial*   _uart;
-#endif
-
-    unsigned long _baud;
-    
-    int _resetPin;     
-    int _dtrPin;
-    bool _lowPowerMode;
-
-    unsigned long _lastResponseOrUrcMillis;
-
-    enum 
-    {
-      AT_COMMAND_IDLE,
-      AT_RECEIVING_RESPONSE
-    } _atCommandState;
-    
-    int _ready;
-    String _buffer;
-    String* _responseDataStorage;
-
-    static ModemUrcHandler* _urcHandlers[MAX_URC_HANDLERS];
-    static Print* _debugPrint;
 };
 
 //////////////////////////////////////////////////////
