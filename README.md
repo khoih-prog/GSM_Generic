@@ -2010,6 +2010,8 @@ nect: host = blynk-cloud.com, port = 8080
 </p>
 
 
+---
+
 
 #### 2. GSM_MQTTS_ThingStream on NINA_B302_ublox with u-blox SARA-G350 GSM_GPRS modem
 
@@ -2019,6 +2021,8 @@ Check [**U-BLOX NINA B302 + GSM ACCESSING THINGSTREAM.IO (SSL)**](https://nina-b
     <img src="https://github.com/khoih-prog/GSM_Generic/blob/main/pics/B302_SARA_G350_Thingstream_SSL.png">
 </p>
 
+
+---
 
 
 #### 3. GsmWebClient on u-blox ESP32-based NINA_W106 and LISA-U200 GSM_GPRS modem
