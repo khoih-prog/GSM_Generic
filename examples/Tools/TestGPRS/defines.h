@@ -25,24 +25,33 @@
 #define DEBUG_GSM_GENERIC_PORT       Serial
 
 // Debug Level from 0 to 5. Level 5 is to print out AT commands and responses
-#define _GSM_GENERIC_LOGLEVEL_       5
+#define _GSM_GENERIC_LOGLEVEL_       4
 
 #define SECRET_PINNUMBER     ""
-//#define SECRET_GPRS_APN      "GPRS_APN" // replace your GPRS APN
-//#define SECRET_GPRS_APN      "rogers-core-appl1.apn"    //"GPRS_APN" // replace your GPRS APN
+//#define SECRET_GPRS_APN      "GPRS_APN"                   // replace your GPRS APN
+//#define SECRET_GPRS_APN      "rogers-core-appl1.apn"      //"GPRS_APN" // replace your GPRS APN
 //#define SECRET_GPRS_APN      "Fido-core-appl1.apn";       // FIDO APN
-//#define SECRET_GPRS_APN      "LTEMOBILE.APN";           // FIDO LTE APN
-#define SECRET_GPRS_APN      "ltedata.apn";           // FIDO LTE APN
-#define SECRET_GPRS_LOGIN    ""                           // replace with your GPRS login
-#define SECRET_GPRS_PASSWORD ""                           // replace with your GPRS password
+//#define SECRET_GPRS_APN      "LTEMOBILE.APN";             // FIDO LTE APN
+//#define SECRET_GPRS_APN      "ltedata.apn";               // FIDO LTE APN
+#define SECRET_GPRS_APN        "hologram";                  // hologram.io APN
+#define SECRET_GPRS_LOGIN    ""                             // replace with your GPRS login
+#define SECRET_GPRS_PASSWORD ""                             // replace with your GPRS password
 
 //////////////////////////////////////////////
 
 #if !defined(ARDUINO_SAMD_MKRGSM1400)
   // Override the default (and certainly not good) pins and port
   // Only for boards other than ARDUINO_SAMD_MKRGSM1400
-  #define GSM_RESETN  (10u)
-  #define GSM_DTR     (11u)
+  #if (ESP32)
+    #define GSM_RESETN  (33u)
+    #define GSM_DTR     (34u)
+  #elif (ESP8266)
+    #define GSM_RESETN  (D3)
+    #define GSM_DTR     (D4)
+  #else
+    #define GSM_RESETN  (10u)
+    #define GSM_DTR     (11u)
+  #endif
 
   #if ESP8266
     // Using Software Serial for ESP8266, as Serial1 is TX only

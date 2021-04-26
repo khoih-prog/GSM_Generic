@@ -18,6 +18,7 @@
   * [To be Supported modems](#to-be-supported-modems)
   * [Currently supported Boards](#currently-supported-boards)
 * [Changelog](#changelog)
+  * [Release v1.3.1](#release-v131)
   * [Major Release v1.3.0](#major-release-v130)
   * [Release v1.2.4](#release-v124)
 * [Prerequisites](#prerequisites)
@@ -35,6 +36,23 @@
   * [5. For Adafruit SAMD boards](#5-for-adafruit-samd-boards)
   * [6. For Seeeduino SAMD boards](#6-for-seeeduino-samd-boards)
   * [7. For STM32 boards](#7-for-stm32-boards)
+* [HOWTO Install esp32 core for ESP32-S2 (Saola, AI-Thinker ESP-12K) and ESP32-C3 boards into Arduino IDE](#howto-install-esp32-core-for-esp32-s2-saola-ai-thinker-esp-12k-and-esp32-c3-boards-into-arduino-ide)
+  * [1. Save the original esp32 core](#1-save-the-original-esp32-core)
+  * [2. Install esp32 core v1.0.6](#2-install-esp32-core-v106)
+    * [2.1 Install esp32 core](#21-install-esp32-core)
+    * [2.2 Download latest zip with esp32-s2 support](#22-download-latest-zip-with-esp32-s2-support)
+    * [2.3 Unzip](#23-unzip)
+    * [2.3 Update esp32 core directories](#24-update-esp32-core-directories)
+  * [3. Download tools for ESP32-S2](#3-download-tools-for-esp32-s2) 
+    * [3.1 Download Toolchain for Xtensa (ESP32-S2) based on GCC](#31-download-toolchain-for-xtensa-esp32-s2-based-on-gcc)
+    * [3.2 Download esptool](#32-download-esptool)
+    * [3.3 Unzip](#33-unzip)
+  * [4. Update tools](#4-update-tools)
+    * [4.1 Update Toolchain](#41-update-toolchain)
+    * [4.2 Update esptool](#42-update-esptool)
+  * [5. Download tools for ESP32-C3](#5-download-tools-for-esp32-c3)
+  * [6. esp32-s2 WebServer Library Patch](#6-esp32-s2-webserver-library-patch)
+* [Note for Platform IO using ESP32 LittleFS](#note-for-platform-io-using-esp32-littlefs)
 * [Reference](#reference)
 * [Documentation](#documentation)
   * [1. How it works](#1-how-it-works)
@@ -100,8 +118,8 @@
   * [2. File defines.h](#2-file-definesh)
 * [Debug Terminal Output Samples](#debug-terminal-output-samples)
   * [1. GSM_Blynk on NINA_B302_ublox with u-blox SARA-G350 GSM_GPRS modem](#1-gsm_blynk-on-nina_b302_ublox-with-u-blox-sara-g350-gsm_gprs-modem)
-  * [2. GSM_MQTT_ThingStream on NINA_B302_ublox with u-blox SARA-G350 GSM_GPRS modem](#2-gsm_mqtt_thingstream-on-nina_b302_ublox-with-u-blox-sara-g350-gsm_gprs-modem)
-  * [3. GSM_MQTTS_ThingStream on NINA_B302_ublox with u-blox SARA-G350 GSM_GPRS modem](#3-gsm_mqtts_thingstream-on-nina_b302_ublox-with-u-blox-sara-g350-gsm_gprs-modem)
+  * [2. GSM_MQTTS_ThingStream on NINA_B302_ublox with u-blox SARA-G350 GSM_GPRS modem](#2-gsm_mqtts_thingstream-on-nina_b302_ublox-with-u-blox-sara-g350-gsm_gprs-modem)
+  * [3. GsmWebClient on u-blox ESP32-based NINA_W106 and LISA-U200 GSM_GPRS modem](#3-gsmwebclient-on-u-blox-esp32-based-nina_w106-and-lisa-u200-gsm_gprs-modem)
 * [Troubleshooting](#troubleshooting)
 * [Releases](#releases)
 * [Issues](#issues)
@@ -187,7 +205,7 @@ This [**GSM_Generic** library](https://github.com/khoih-prog/GSM_Generic) curren
   
  5. **Teensy (4.1, 4.0, 3.6, 3.5, 3,2, 3.1, 3.0, LC)**
  
- 6. **ESP32 including ESP32-S2 (ESP32-S2 Saola, AI-Thinker ESP-12K, etc.)**
+ 6. **ESP32 including ESP32-S2 (ESP32-S2 Saola, AI-Thinker ESP-12K, etc.) and ESP32-C3**
  
  7. **ESP8266**
   
@@ -197,7 +215,7 @@ This [**GSM_Generic** library](https://github.com/khoih-prog/GSM_Generic) curren
   - Nucleo-64
   - Discovery
   - Generic STM32F0, STM32F1, STM32F2, STM32F3, STM32F4, STM32F7 (with 64+K Flash): x8 and up
-  - STM32L0, STM32L1, STM32L4
+  - STM32L0, STM32L1, STM32L4, STM32L5
   - STM32G0, STM32G4
   - STM32H7
   - STM32WB
@@ -211,6 +229,12 @@ This [**GSM_Generic** library](https://github.com/khoih-prog/GSM_Generic) curren
 ---
 
 ## Changelog
+
+### Release v1.3.1
+
+1. Fix reset bug on ESP32
+2. Add support to **ESP32-C3** with new ESP32 core v1.0.6
+3. Add support to many STM32 boards, including **STM32L5** with new STM32 core v2.0.0
 
 ### Major Release v1.3.0
 
@@ -235,13 +259,13 @@ This [**GSM_Generic** library](https://github.com/khoih-prog/GSM_Generic) curren
  2. [`Teensy core v1.51`](https://www.pjrc.com/teensy/td_download.html) for Teensy (4.0, 3.6, 3.5, 3,2, 3.1, 3.0) boards and [`Teensy core v1.53+`](https://www.pjrc.com/teensy/td_download.html) for Teensy 4.1 boards using NativeEthernet.
  3. [`Arduino SAM DUE core v1.6.12+`](https://www.arduino.cc/en/Guide/ArduinoDue) for SAM DUE ARM Cortex-M3 boards.
  4. [`Arduino SAMD core 1.8.11+`](https://www.arduino.cc/en/Guide/ArduinoM0) for SAMD ARM Cortex-M0+ boards. [![GitHub release](https://img.shields.io/github/release/arduino/ArduinoCore-samd.svg)](https://github.com/arduino/ArduinoCore-samd/releases/latest)
- 5. [`Adafruit SAMD core 1.6.5+`](https://www.adafruit.com/) for SAMD ARM Cortex-M0+ and M4 boards (Nano 33 IoT, etc.). [![GitHub release](https://img.shields.io/github/release/adafruit/ArduinoCore-samd.svg)](https://github.com/adafruit/ArduinoCore-samd/releases/latest)
+ 5. [`Adafruit SAMD core 1.6.7+`](https://www.adafruit.com/) for SAMD ARM Cortex-M0+ and M4 boards (Nano 33 IoT, etc.). [![GitHub release](https://img.shields.io/github/release/adafruit/ArduinoCore-samd.svg)](https://github.com/adafruit/ArduinoCore-samd/releases/latest)
  6. [`Seeeduino SAMD core 1.8.1+`](https://github.com/Seeed-Studio/ArduinoCore-samd) for SAMD21/SAMD51 boards (XIAO M0, Wio Terminal, etc.). [![Latest release](https://img.shields.io/github/release/Seeed-Studio/ArduinoCore-samd.svg)](https://github.com/Seeed-Studio/ArduinoCore-samd/releases/latest/)
  7. [`Adafruit nRF52 v0.21.0+`](https://www.adafruit.com) for nRF52 boards such as Adafruit NRF52840_FEATHER, NRF52832_FEATHER, NRF52840_FEATHER_SENSE, NRF52840_ITSYBITSY, NRF52840_CIRCUITPLAY, NRF52840_CLUE, NRF52840_METRO, NRF52840_PCA10056, PARTICLE_XENON, **NINA_B302_ublox**, etc. [![GitHub release](https://img.shields.io/github/release/adafruit/Adafruit_nRF52_Arduino.svg)](https://github.com/adafruit/Adafruit_nRF52_Arduino/releases/latest)
  8. [`ESP8266 Core 2.7.4+`](https://github.com/esp8266/Arduino) for ESP8266-based boards. [![Latest release](https://img.shields.io/github/release/esp8266/Arduino.svg)](https://github.com/esp8266/Arduino/releases/latest/). To use ESP8266 core 2.7.1+ for LittleFS. 
  9. [`ESP32 Core 1.0.6+`](https://github.com/espressif/arduino-esp32) for ESP32-based boards. [![Latest release](https://img.shields.io/github/release/espressif/arduino-esp32.svg)](https://github.com/espressif/arduino-esp32/releases/latest/)
-10. [`ESP32S2 Core 1.0.5+`](https://github.com/espressif/arduino-esp32/tree/esp32s2) for ESP32S2-based boards.
-11. [`Arduino Core for STM32 v1.9.0+`](https://github.com/stm32duino/Arduino_Core_STM32) for STM32 boards. [![GitHub release](https://img.shields.io/github/release/stm32duino/Arduino_Core_STM32.svg)](https://github.com/stm32duino/Arduino_Core_STM32/releases/latest)
+10. [`ESP32-S2/C3 Core 1.0.6+`](https://github.com/espressif/arduino-esp32) for ESP32-S2/C3-based boards. Must follow [HOWTO Install esp32 core for ESP32-S2 (Saola, AI-Thinker ESP-12K) and ESP32-C3 boards into Arduino IDE](#howto-install-esp32-core-for-esp32-s2-saola-ai-thinker-esp-12k-and-esp32-c3-boards-into-arduino-ide).
+11. [`Arduino Core for STM32 v2.0.0+`](https://github.com/stm32duino/Arduino_Core_STM32) for STM32 boards. [![GitHub release](https://img.shields.io/github/release/stm32duino/Arduino_Core_STM32.svg)](https://github.com/stm32duino/Arduino_Core_STM32/releases/latest)
 
 ---
 
@@ -407,6 +431,194 @@ theses files must be copied into the corresponding directory:
 
 - `~/.arduino15/packages/STM32/hardware/stm32/x.yy.zz/variants/NUCLEO_F767ZI/variant.h`
 - `~/.arduino15/packages/STM32/hardware/stm32/x.yy.zz/variants/NUCLEO_L053R8/variant.h`
+
+---
+---
+
+## HOWTO Install esp32 core for ESP32-S2 (Saola, AI-Thinker ESP-12K) and ESP32-C3 boards into Arduino IDE
+
+
+These are instructions demonstrating the steps to install esp32-s2/c3 core on Ubuntu machines. For Windows or other OS'es, just follow the the similar principles and steps.
+
+* Windows 10, follows these steps in [Steps to install Arduino ESP32 support on Windows](https://github.com/espressif/arduino-esp32/blob/master/docs/arduino-ide/windows.md) 
+
+* Mac OS, follows these steps in [Installation instructions for Mac OS](https://github.com/espressif/arduino-esp32/blob/master/docs/arduino-ide/mac.md)
+
+* Fedora, follows these steps in [Installation instructions for Fedora](https://github.com/espressif/arduino-esp32/blob/master/docs/arduino-ide/fedora.md)
+
+* openSUSE, follows these steps in [Installation instructions for openSUSE](https://github.com/espressif/arduino-esp32/blob/master/docs/arduino-ide/opensuse.md)
+
+* You can also try to add [package_esp32_dev_index.json](https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_dev_index.json) into Arduino IDE `File - Preferences - Additional Boards Manager URLs` 
+
+
+```
+https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_dev_index.json
+```
+
+and have Board Manager auto-install the **development** esp32 core. For example : esp32 core `v2.0.0-alpha1`
+
+
+---
+
+If you're already successful in testing the core, after installing by using the above procedures, you don't need to follows the hereafter manual steps.
+
+---
+
+Assuming you already installed Arduino IDE ESP32 core and the installed directory is
+
+`/home/your_account/.arduino15/packages/esp32`
+
+
+### 1. Save the original esp32 core
+
+First, copy the whole original esp32 core to another safe place. Then delete all the sub-directories of
+
+`/home/your_account/.arduino15/packages/esp32/hardware/esp32/1.0.4`
+
+---
+
+
+### 2. Install esp32 core v1.0.6
+
+#### 2.1 Install esp32 core
+
+Just use Arduino IDE Board Manager to install [ESP32 Arduino Release 1.0.6 based on ESP-IDF v3.3.5](https://github.com/espressif/arduino-esp32/releases/tag/1.0.6). This official v1.06 core doesn't have esp32-s2/s3 support. You have to download and use the latest master branch.
+
+
+#### 2.2 Download latest zip with esp32-s2 support
+
+As of **April 16th 2021**, the **esp32-s2/c3** board support has been included in master branch of esp32 core. Download [**esp32 core, master branch**](https://github.com/espressif/arduino-esp32) in the zip format.
+
+#### 2.3 Unzip
+
+<p align="center">
+    <img src="https://github.com/khoih-prog/GSM_Generic/blob/main/pics/esp32_s2_Core_Unzipped.png">
+</p>
+
+#### 2.4 Update esp32 core directories
+
+Copy all subdirectories of esp32 core into `/home/your_account/.arduino15/packages/esp32/hardware/esp32/1.0.6`
+
+
+---
+
+### 3 Download tools for ESP32-S2
+
+
+#### 3.1 Download Toolchain for Xtensa (ESP32-S2) based on GCC
+
+Download [**esp32-s2 Toolchain**](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/api-guides/tools/idf-tools.html#xtensa-esp32s2-elf) corresponding to your environment (linux-amd64, win64, etc.).
+
+For example `xtensa-esp32s2-elf-gcc8_4_0-esp-2020r3-linux-amd64.tar.gz`, then un-archive.
+
+
+<p align="center">
+    <img src="https://github.com/khoih-prog/GSM_Generic/blob/main/pics/esp32_s2_Toolchain.png">
+</p>
+
+#### 3.2 Download esptool
+
+
+Download [esptool](https://github.com/espressif/esptool/releases) int the `zip` format:
+
+`esptool-3.0.zip`
+
+#### 3.3 Unzip
+
+<p align="center">
+    <img src="https://github.com/khoih-prog/GSM_Generic/blob/main/pics/esp32_s2_esptool.png">
+</p>
+
+---
+
+### 4. Update tools
+
+#### 4.1 Update Toolchain
+
+Copy whole `xtensa-esp32s2-elf` directory into `/home/your_account/.arduino15/packages/esp32/hardware/esp32/1.0.6/tools`
+
+
+#### 4.2 Update esptool
+
+Rename `esptool-3.0` directory to `esptool`
+
+
+Copy whole `esptool` directory into `/home/your_account/.arduino15/packages/esp32/hardware/esp32/1.0.6/tools`
+
+
+<p align="center">
+    <img src="https://github.com/khoih-prog/GSM_Generic/blob/main/pics/esp32_s2_tools.png">
+</p>
+
+
+### 5 Download tools for ESP32-C3
+
+Download [**esp32-c3 Toolchain**](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/api-guides/tools/idf-tools.html#riscv32-esp-elf) corresponding to your environment (linux-amd64, win64, etc.).
+
+For example`riscv32-esp-elf-gcc8_4_0-crosstool-ng-1.24.0-123-g64eb9ff-linux-amd64.tar.gz`, then un-archive.
+
+Then using the similar steps as in
+
+* [3. Download tools for ESP32-S2](#3-download-tools-for-esp32-s2) 
+  * [3.1 Download Toolchain for Xtensa (ESP32-S2) based on GCC](#31-download-toolchain-for-xtensa-esp32-s2-based-on-gcc)
+  * [3.2 Download esptool](#32-download-esptool)
+  * [3.3 Unzip](#33-unzip)
+* [4. Update tools](#4-update-tools)
+  * [4.1 Update Toolchain](#41-update-toolchain)
+  * [4.2 Update esptool](#42-update-esptool)
+
+then copy whole `riscv32-esp-elf` directory into `/home/your_account/.arduino15/packages/esp32/hardware/esp32/1.0.6/tools`
+
+<p align="center">
+    <img src="https://github.com/khoih-prog/GSM_Generic/blob/main/pics/GSM_Generic_ESP32_C3_Support.png">
+</p>
+
+
+### 6. esp32-s2 WebServer Library Patch
+
+#### Necessary only for esp32 core v1.0.6-
+
+If you haven't installed a new version with [WebServer.handleClient delay PR #4350](https://github.com/espressif/arduino-esp32/pull/4350) or haven't applied the above mentioned PR, you have to use the following patch.
+
+
+**To be able to run Config Portal on ESP32-S2 boards**, you have to copy the files in [esp32-s2 WebServer Patch](esp32s2_WebServer_Patch/) directory into esp32-s2 WebServer library directory (~/.arduino15/packages/esp32/hardware/esp32/1.0.4/libraries/WebServer).
+
+Supposing the esp32-s2 version is 1.0.4, these files `WebServer.h/cpp` must be copied into the directory to replace:
+
+- `~/.arduino15/packages/esp32/hardware/esp32/1.0.4/libraries/WebServer/src/WebServer.h`
+- `~/.arduino15/packages/esp32/hardware/esp32/1.0.4/libraries/WebServer/src/WebServer.cpp`
+
+
+---
+
+That's it. You're now ready to compile and test for **ESP32-S2 and ESP32-C3** now
+
+---
+---
+
+### Note for Platform IO using ESP32 LittleFS
+
+#### Necessary only for esp32 core v1.0.6-
+
+From esp32 core v1.0.6+, [`LittleFS_esp32 v1.0.6`](https://github.com/lorol/LITTLEFS) has been included and this step is not necessary anymore.
+
+In Platform IO, to fix the error when using [`LittleFS_esp32 v1.0`](https://github.com/lorol/LITTLEFS) for ESP32-based boards with ESP32 core v1.0.4- (ESP-IDF v3.2-), uncomment the following line
+
+from
+
+```
+//#define CONFIG_LITTLEFS_FOR_IDF_3_2   /* For old IDF - like in release 1.0.4 */
+```
+
+to
+
+```
+#define CONFIG_LITTLEFS_FOR_IDF_3_2   /* For old IDF - like in release 1.0.4 */
+```
+
+It's advisable to use the latest [`LittleFS_esp32 v1.0.5+`](https://github.com/lorol/LITTLEFS) to avoid the issue.
+
+Thanks to [Roshan](https://github.com/solroshan) to report the issue in [Error esp_littlefs.c 'utime_p'](https://github.com/khoih-prog/ESPAsync_WiFiManager/issues/28) 
 
 ---
 ---
@@ -1554,10 +1766,11 @@ void setup()
   // connection state
   bool connected = false;
 
+#if 1
   // After starting the modem with GSM.begin()
   // attach the shield to the GPRS network with the APN, login and password
   while (!connected) 
-  {
+  {  
     if ((gsmAccess.begin(baudRateSerialGSM, PINNUMBER) == GSM_READY) &&
         (gprs.attachGPRS(GPRS_APN, GPRS_LOGIN, GPRS_PASSWORD) == GPRS_READY))
     {
@@ -1569,6 +1782,7 @@ void setup()
       delay(1000);
     }
   }
+#endif
 
   Serial.println("connecting...");
 
@@ -1656,8 +1870,16 @@ void loop()
 #if !defined(ARDUINO_SAMD_MKRGSM1400)
   // Override the default (and certainly not good) pins and port
   // Only for boards other than ARDUINO_SAMD_MKRGSM1400
-  #define GSM_RESETN  (10u)
-  #define GSM_DTR     (11u)
+  #if (ESP32)
+    #define GSM_RESETN  (33u)
+    #define GSM_DTR     (34u)
+  #elif (ESP8266)
+    #define GSM_RESETN  (D3)
+    #define GSM_DTR     (D4)
+  #else
+    #define GSM_RESETN  (10u)
+    #define GSM_DTR     (11u)
+  #endif
 
   #if ESP8266
     // Using Software Serial for ESP8266, as Serial1 is TX only
@@ -1704,7 +1926,7 @@ void loop()
 #define GSM_MODEM_SIM800            false
 #define GSM_MODEM_SIM808            false
 #define GSM_MODEM_SIM868            false
-#define GSM_MODEM_SIM900            true
+#define GSM_MODEM_SIM900            false
 #define GSM_MODEM_SIM5300           false
 #define GSM_MODEM_SIM5320           false
 #define GSM_MODEM_SIM5360           false
@@ -1742,7 +1964,7 @@ Check [**NINA B302 ACCESSING BLYNK VIA GSM - SARA G350**](https://nina-gsm.blogs
 
 ```
 Start GSM_Blynk on NINA_B302_ublox
-GSM_Generic v1.3.0
+GSM_Generic v1.3.1
 [2485] 
     ___ __ __
    / _) / / _ _____ / / __
@@ -1783,14 +2005,30 @@ nect: host = blynk-cloud.com, port = 8080
 [GSM] GSMClient :: connected: OK
 ```
 
-#### 2. GSM_MQTT_ThingStream on NINA_B302_ublox with u-blox SARA-G350 GSM_GPRS modem
+<p align="center">
+    <img src="https://github.com/khoih-prog/GSM_Generic/blob/main/pics/B302_SARA_G350_Blynk.png">
+</p>
 
-Check [**U-BLOX NINA B302 + GSM ACCESSING THINGSTREAM.IO**](https://nina-gsm.blogspot.com/2021/03/u-blox-nina-e-rede-gsm-o-objetivo-deste.html)
 
 
-#### 3. GSM_MQTTS_ThingStream on NINA_B302_ublox with u-blox SARA-G350 GSM_GPRS modem
+#### 2. GSM_MQTTS_ThingStream on NINA_B302_ublox with u-blox SARA-G350 GSM_GPRS modem
 
 Check [**U-BLOX NINA B302 + GSM ACCESSING THINGSTREAM.IO (SSL)**](https://nina-b302-wifi-mqtt.blogspot.com/2021/03/u-blox-nina-b302-gsm-acessando_30.html)
+
+<p align="center">
+    <img src="https://github.com/khoih-prog/GSM_Generic/blob/main/pics/B302_SARA_G350_Thingstream_SSL.png">
+</p>
+
+
+
+#### 3. GsmWebClient on u-blox ESP32-based NINA_W106 and LISA-U200 GSM_GPRS modem
+
+Check [**U-BLOX NINA AND GSM NETWORK - LISA U200**](https://nina-gsm.blogspot.com/2021/04/u-blox-nina-w106-e-rede-gsm.html)
+
+<p align="center">
+    <img src="https://github.com/khoih-prog/GSM_Generic/blob/main/pics/W106_LISA_U200.png">
+</p>
+
 
 ---
 ---
@@ -1818,6 +2056,12 @@ Sometimes, the library will only work if you update the board core to the newer 
 ---
 
 ## Releases
+
+### Release v1.3.1
+
+1. Fix reset bug on ESP32
+2. Add support to **ESP32-C3** with new ESP32 core v1.0.6
+3. Add support to many STM32 boards, including **STM32L5** with new STM32 core v2.0.0
 
 ### Malor Release v1.3.0
 
@@ -1857,10 +2101,10 @@ Submit issues to: [**GSM_Generic issues**](https://github.com/khoih-prog/GSM_Gen
  5. Add support to Teensy.
  6. Add support to all **STM32F/L/H/G/WB/MP1 having 64K+** Flash program memory.
  7. Add support to **Seeeduino SAMD21/SAMD51 boards (SEEED_WIO_TERMINAL, SEEED_FEMTO_M0, SEEED_XIAO_M0, Wio_Lite_MG126, WIO_GPS_BOARD, SEEEDUINO_ZERO, SEEEDUINO_LORAWAN, SEEED_GROVE_UI_WIRELESS, etc.)**
- 8. Add support to ESP32 (including ESP32-S2) and ESP8266 (only using Hardware Serial)
+ 8. Add support to ESP32 (including ESP32-S2 and ESP32-C3) and ESP8266 (only using Hardware Serial)
  9. Support u-blox Sara U201 GSM/GPRS module
 10. Support u-blox Sara G3xx GSM/GPRS module
-
+11. Add support to STM32L5 and many remaining STM32 boards with new STM32 core v2.0.0
 
 ---
 ---

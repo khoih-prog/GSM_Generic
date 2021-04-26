@@ -18,12 +18,13 @@
   You should have received a copy of the GNU General Public License along with this program.
   If not, see <https://www.gnu.org/licenses/>.
 
-  Version: 1.3.0
+  Version: 1.3.1
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   1.2.4    K Hoang     11/03/2021 Initial public release to add support to many boards / modules besides MKRGSM 1400 / SARA U201
   1.3.0    K Hoang     31/03/2021 Add ThingStream MQTTS support. Fix SMS receive bug.
+  1.3.1    K Hoang     25/04/2021 Fix bug making ESP32 reset repeatedly.
  **********************************************************************************************************************************/
 /*
 
@@ -50,8 +51,16 @@
 #if !defined(ARDUINO_SAMD_MKRGSM1400)
   // Override the default (and certainly not good) pins and port
   // Only for boards other than ARDUINO_SAMD_MKRGSM1400
-  #define GSM_RESETN  (10u)
-  #define GSM_DTR     (11u)
+  #if (ESP32)
+    #define GSM_RESETN  (33u)
+    #define GSM_DTR     (34u)
+  #elif (ESP8266)
+    #define GSM_RESETN  (D3)
+    #define GSM_DTR     (D4)
+  #else
+    #define GSM_RESETN  (10u)
+    #define GSM_DTR     (11u)
+  #endif
 
   #if ESP8266
     // Using Software Serial for ESP8266, as Serial1 is TX only

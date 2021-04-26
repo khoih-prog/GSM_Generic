@@ -18,12 +18,13 @@
   You should have received a copy of the GNU General Public License along with this program.
   If not, see <https://www.gnu.org/licenses/>.
 
-  Version: 1.3.0
+  Version: 1.3.1
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   1.2.4    K Hoang     11/03/2021 Initial public release to add support to many boards / modules besides MKRGSM 1400 / SARA U201
   1.3.0    K Hoang     31/03/2021 Add ThingStream MQTTS support. Fix SMS receive bug.
+  1.3.1    K Hoang     25/04/2021 Fix bug making ESP32 reset repeatedly.
  **********************************************************************************************************************************/
 
 /*
@@ -82,10 +83,11 @@ void setup()
   // connection state
   bool connected = false;
 
+#if 1
   // After starting the modem with GSM.begin()
   // attach the shield to the GPRS network with the APN, login and password
   while (!connected) 
-  {
+  {  
     if ((gsmAccess.begin(baudRateSerialGSM, PINNUMBER) == GSM_READY) &&
         (gprs.attachGPRS(GPRS_APN, GPRS_LOGIN, GPRS_PASSWORD) == GPRS_READY))
     {
@@ -97,6 +99,7 @@ void setup()
       delay(1000);
     }
   }
+#endif
 
   Serial.println("connecting...");
 

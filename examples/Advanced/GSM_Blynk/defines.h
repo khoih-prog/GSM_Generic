@@ -44,8 +44,16 @@
 #if !defined(ARDUINO_SAMD_MKRGSM1400)
   // Override the default (and certainly not good) pins and port
   // Only for boards other than ARDUINO_SAMD_MKRGSM1400
-  #define GSM_RESETN  (10u)
-  #define GSM_DTR     (11u)
+  #if (ESP32)
+    #define GSM_RESETN  (33u)
+    #define GSM_DTR     (34u)
+  #elif (ESP8266)
+    #define GSM_RESETN  (D3)
+    #define GSM_DTR     (D4)
+  #else
+    #define GSM_RESETN  (10u)
+    #define GSM_DTR     (11u)
+  #endif
 
   #if ESP8266
     // Using Software Serial for ESP8266, as Serial1 is TX only
