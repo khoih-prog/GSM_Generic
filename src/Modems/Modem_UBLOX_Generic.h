@@ -18,12 +18,13 @@
   You should have received a copy of the GNU General Public License along with this program.
   If not, see <https://www.gnu.org/licenses/>.  
  
-  Version: 1.3.0
+  Version: 1.3.1
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   1.2.4    K Hoang     11/03/2021 Initial public release to add support to many boards / modules besides MKRGSM 1400 / SARA U201
   1.3.0    K Hoang     31/03/2021 Add ThingStream MQTTS support. Fix SMS receive bug.
+  1.3.1    K Hoang     25/04/2021 Fix bug making ESP32 reset repeatedly.
  **********************************************************************************************************************************/
 
 #pragma once
@@ -136,7 +137,8 @@ class ModemClass
     int begin(unsigned long baud, bool restart = true)
     {
       (void) restart;
-      
+
+     
 #if UBLOX_USING_SET_BAUD
       bool newBaud = false;
       
@@ -154,10 +156,20 @@ class ModemClass
 #endif
         
       GSM_LOGDEBUG1(F("begin: UART baud = "), _baud);  
-      
-      _uart->begin(_baud > 115200 ? 115200 : _baud);
-      
 
+
+#if !defined(ARDUINO_SAMD_MKRGSM1400)
+      #warning Using SerialGSM.begin
+      #if (ESP32)
+        SerialGSM.updateBaudRate(_baud > 115200 ? 115200 : _baud);
+        SerialGSM.begin(_baud > 115200 ? 115200 : _baud);
+      #else  
+        SerialGSM.begin(_baud > 115200 ? 115200 : _baud);
+      #endif
+#else 
+      _uart->begin(_baud > 115200 ? 115200 : _baud);
+#endif
+      
 #if UBLOX_USING_RESET_PIN
       if (_resetPin > -1 && restart) 
       {
@@ -249,7 +261,7 @@ class ModemClass
         }
       }
 #endif
-      
+           
       GSM_LOGDEBUG(F("begin: Modem OK"));
 
       return GSM_MODEM_START_OK;
@@ -263,7 +275,7 @@ class ModemClass
     }
     
     /////////////////////////////////////////
-    
+       
     void end()
     {
       _uart->end();

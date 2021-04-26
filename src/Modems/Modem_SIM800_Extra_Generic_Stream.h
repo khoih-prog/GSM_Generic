@@ -1,5 +1,5 @@
 /*********************************************************************************************************************************
-  Modem_SaraR4_Extra_Generic.h
+  Modem_SIM800_Extra_Generic.h
   
   For ESP8266, ESP32, SAMD21/SAMD51, nRF52, SAM DUE, Teensy and STM32 with GSM modules
   
@@ -29,10 +29,12 @@
 
 #pragma once
 
-#ifndef _MODEM_SARA_R4_EXTRA_INCLUDED_H
-#define _MODEM_SARA_R4_EXTRA_INCLUDED_H
+#ifndef _MODEM_SIM800_EXTRA_INCLUDED_H
+#define _MODEM_SIM800_EXTRA_INCLUDED_H
 
 ///////////////////////////////////////////////////////////////////////
+
+//#define GSM_NL "\r\n"
 
 class GPRS_ModemUrcHandler : public ModemUrcHandler 
 {
@@ -57,7 +59,9 @@ class GPRS_ModemUrcHandler : public ModemUrcHandler
 
         case GPRS_STATE_ATTACH:
           {
-            MODEM.send("AT+CGATT=1");
+            //MODEM.send("AT+CGATT=1");
+            MODEM.send("AT++SAPBR=3,1,\"Contype\",\"GPRS\"");     // Set the connection type to GPRS
+            
             _state = GPRS_STATE_WAIT_ATTACH_RESPONSE;
             ready = GSM_RESPONSE_IDLE;
             break;
@@ -80,7 +84,9 @@ class GPRS_ModemUrcHandler : public ModemUrcHandler
           }
         case GPRS_STATE_SET_APN:
           {
-            MODEM.sendf("AT+UPSD=0,1,\"%s\"", _apn);
+            //MODEM.sendf("AT+UPSD=0,1,\"%s\"", _apn);
+            MODEM.sendf("AT+SAPBR=3,1,\"APN\",\"%s\"", _apn);   // Set the APN
+            
             _state = GPRS_STATE_WAIT_SET_APN_RESPONSE;
             ready = GSM_RESPONSE_IDLE;
 
@@ -144,7 +150,9 @@ class GPRS_ModemUrcHandler : public ModemUrcHandler
 
         case GPRS_STATE_SET_USERNAME:
           {
-            MODEM.sendf("AT+UPSD=0,2,\"%s\"", _username);
+            //MODEM.sendf("AT+UPSD=0,2,\"%s\"", _username);
+            MODEM.sendf("AT+SAPBR=3,1,\"USER\",\"%s\"", _username);   // Set the user name
+            
             _state = GPRS_STATE_WAIT_SET_USERNAME_RESPONSE;
             ready = GSM_RESPONSE_IDLE;
 
@@ -169,7 +177,9 @@ class GPRS_ModemUrcHandler : public ModemUrcHandler
 
         case GPRS_STATE_SET_PASSWORD:
           {
-            MODEM.sendf("AT+UPSD=0,3,\"%s\"", _password);
+            //MODEM.sendf("AT+UPSD=0,3,\"%s\"", _password);
+            MODEM.sendf("AT+SAPBR=3,1,\"PWD\",\"%s\"", _password);    // Set the password
+            
             _state = GPRS_STATE_WAIT_SET_PASSWORD_RESPONSE;
             ready = GSM_RESPONSE_IDLE;
 
@@ -192,6 +202,271 @@ class GPRS_ModemUrcHandler : public ModemUrcHandler
             break;
           }
 
+#if 1
+        case GPRS_STATE_DEFINE_PDP_CONTEXT:
+          {
+            MODEM.sendf("AT+CGDCONT=1,\"IP\",\"%s\"", _apn);    // Define the PDP context
+                
+            _state = GPRS_STATE_WAIT_DEFINE_PDP_CONTEXT_RESPONSE;
+            ready = GSM_RESPONSE_IDLE;
+
+            break;
+          }
+
+        case GPRS_STATE_WAIT_DEFINE_PDP_CONTEXT_RESPONSE:
+          {
+            if (ready > GSM_RESPONSE_OK)
+            {
+              _state = GPRS_STATE_IDLE;
+              _status = GSM_ERROR;
+            }
+            else
+            {
+              _state = GPRS_STATE_ACTIVATE_PDP_CONTEXT;
+              ready = GSM_RESPONSE_IDLE;
+            }
+
+            break;
+          }
+          
+        case GPRS_STATE_ACTIVATE_PDP_CONTEXT:
+          {
+            MODEM.send("AT+CGACT=1,1");   // Activate the PDP context
+                
+            _state = GPRS_STATE_WAIT_ACTIVATE_PDP_CONTEXT_RESPONSE;
+            ready = GSM_RESPONSE_IDLE;
+
+            break;
+          }
+
+        case GPRS_STATE_WAIT_ACTIVATE_PDP_CONTEXT_RESPONSE:
+          {
+            if (ready > GSM_RESPONSE_OK)
+            {
+              _state = GPRS_STATE_IDLE;
+              _status = GSM_ERROR;
+            }
+            else
+            {
+              _state = GPRS_STATE_OPEN_GPRS_BEARER_CONTEXT;
+              ready = GSM_RESPONSE_IDLE;
+            }
+
+            break;
+          }
+          
+        case GPRS_STATE_OPEN_GPRS_BEARER_CONTEXT:
+          {
+            MODEM.send("AT+SAPBR=1,1");  // Open the defined GPRS bearer context
+                
+            _state = GPRS_STATE_WAIT_OPEN_GPRS_BEARER_CONTEXT_RESPONSE;
+            ready = GSM_RESPONSE_IDLE;
+
+            break;
+          }
+
+        case GPRS_STATE_WAIT_OPEN_GPRS_BEARER_CONTEXT_RESPONSE:
+          {
+            if (ready > GSM_RESPONSE_OK)
+            {
+              _state = GPRS_STATE_IDLE;
+              _status = GSM_ERROR;
+            }
+            else
+            {
+              _state = GPRS_STATE_QUERY_GPRS_BEARER_CONTEXT;
+              ready = GSM_RESPONSE_IDLE;
+            }
+
+            break;
+          }         
+          
+        case GPRS_STATE_QUERY_GPRS_BEARER_CONTEXT:
+          {
+            MODEM.send("AT+SAPBR=2,1");  // Query the GPRS bearer context status
+                
+            _state = GPRS_STATE_WAIT_QUERY_GPRS_BEARER_CONTEXT_RESPONSE;
+            ready = GSM_RESPONSE_IDLE;
+
+            break;
+          }
+
+        case GPRS_STATE_WAIT_QUERY_GPRS_BEARER_CONTEXT_RESPONSE:
+          {
+            if (ready > GSM_RESPONSE_OK)
+            {
+              _state = GPRS_STATE_IDLE;
+              _status = GSM_ERROR;
+            }
+            else
+            {
+              _state = GPRS_STATE_ATTACH_GPRS;
+              ready = GSM_RESPONSE_IDLE;
+            }
+
+            break;
+          }
+          
+        case GPRS_STATE_ATTACH_GPRS:
+          {
+            MODEM.send("AT+CGATT=1");  // Attach to GPRS
+                
+            _state = GPRS_STATE_WAIT_ATTACH_GPRS_RESPONSE;
+            ready = GSM_RESPONSE_IDLE;
+
+            break;
+          }
+
+        case GPRS_STATE_WAIT_ATTACH_GPRS_RESPONSE:
+          {
+            if (ready > GSM_RESPONSE_OK)
+            {
+              _state = GPRS_STATE_IDLE;
+              _status = GSM_ERROR;
+            }
+            else
+            {
+              _state = GPRS_STATE_SET_MULTI_IP;
+              ready = GSM_RESPONSE_IDLE;
+            }
+
+            break;
+          }
+          
+        case GPRS_STATE_SET_MULTI_IP:
+          {
+            MODEM.send("AT+CIPMUX=1");  // Set to multi-IP
+                
+            _state = GPRS_STATE_WAIT_SET_MULTI_IP_RESPONSE;
+            ready = GSM_RESPONSE_IDLE;
+
+            break;
+          }
+
+        case GPRS_STATE_WAIT_SET_MULTI_IP_RESPONSE:
+          {
+            if (ready > GSM_RESPONSE_OK)
+            {
+              _state = GPRS_STATE_IDLE;
+              _status = GSM_ERROR;
+            }
+            else
+            {
+              _state = GPRS_STATE_START_TASK;
+              ready = GSM_RESPONSE_IDLE;
+            }
+
+            break;
+          }
+          
+        // Put in "quick send" mode (thus no extra "Send OK")
+        // Set to get data manually
+          
+        case GPRS_STATE_START_TASK:
+          {
+            MODEM.sendf("AT+CSTT=\"%s\",\"%s\",\"%s\"", _apn, _username, _password);  // Start Task and Set APN, USER NAME, PASSWORD
+                
+            _state = GPRS_STATE_WAIT_START_TASK_RESPONSE;
+            ready = GSM_RESPONSE_IDLE;
+
+            break;
+          }
+
+        case GPRS_STATE_WAIT_START_TASK_RESPONSE:
+          {
+            if (ready > GSM_RESPONSE_OK)
+            {
+              _state = GPRS_STATE_IDLE;
+              _status = GSM_ERROR;
+            }
+            else
+            {
+              _state = GPRS_STATE_WIRELESS_UP;
+              ready = GSM_RESPONSE_IDLE;
+            }
+
+            break;
+          }
+          
+          case GPRS_STATE_WIRELESS_UP:
+          {
+            MODEM.send("AT+CIICR");  // Bring Up Wireless Connection with GPRS or CSD
+                
+            _state = GPRS_STATE_WAIT_WIRELESS_UP_RESPONSE;
+            ready = GSM_RESPONSE_IDLE;
+
+            break;
+          }
+
+        case GPRS_STATE_WAIT_WIRELESS_UP_RESPONSE:
+          {
+            if (ready > GSM_RESPONSE_OK)
+            {
+              _state = GPRS_STATE_IDLE;
+              _status = GSM_ERROR;
+            }
+            else
+            {
+              _state = GPRS_STATE_GET_IP;
+              ready = GSM_RESPONSE_IDLE;
+            }
+
+            break;
+          }
+          
+        case GPRS_STATE_GET_IP:
+          {
+            MODEM.send("AT+CIFSR;E0");
+            _state = GPRS_STATE_WAIT_GET_IP_RESPONSE;
+            ready = GSM_RESPONSE_IDLE;
+
+            break;
+          }
+
+        case GPRS_STATE_WAIT_GET_IP_RESPONSE:
+          {
+            if (ready > GSM_RESPONSE_OK)
+            {
+              _state = GPRS_STATE_IDLE;
+              _status = GSM_ERROR;
+            }
+            else
+            {
+              _state = GPRS_STATE_CONFIG_DNS;
+              ready = GSM_RESPONSE_IDLE;
+            }
+
+            break;
+          }
+          
+        case GPRS_STATE_CONFIG_DNS:
+          {
+            MODEM.send("CDNSCFG=\"8.8.8.8\",\"8.8.4.4\"");
+            _state = GPRS_STATE_WAIT_CONFIG_DNS_RESPONSE;
+            ready = GSM_RESPONSE_IDLE;
+
+            break;
+          }
+
+        case GPRS_STATE_WAIT_CONFIG_DNS_RESPONSE:
+          {
+            if (ready > GSM_RESPONSE_OK)
+            {
+              _state = GPRS_STATE_IDLE;
+              _status = GSM_ERROR;
+            }
+            else
+            {
+              _state = GPRS_STATE_IDLE;
+              _status = GPRS_READY;
+            }
+
+            break;
+          }
+          
+                  
+
+#else
         case GPRS_STATE_SET_DYNAMIC_IP:
           {
             MODEM.send("AT+UPSD=0,7,\"0.0.0.0\"");
@@ -235,12 +510,13 @@ class GPRS_ModemUrcHandler : public ModemUrcHandler
             }
             else
             {
-              _state = GPRS_STATE_CHECK_PROFILE_STATUS;
+              _state = GPRS_STATE_IDLE;
               ready = GSM_RESPONSE_IDLE;
             }
 
             break;
           }
+
 
         case GPRS_STATE_CHECK_PROFILE_STATUS:
           {
@@ -267,10 +543,12 @@ class GPRS_ModemUrcHandler : public ModemUrcHandler
 
             break;
           }
+#endif
 
         case GPRS_STATE_DEACTIVATE_IP:
           {
-            MODEM.send("AT+UPSDA=0,4");
+            MODEM.send("AT+CIPSHUT");   // Shut the TCP/IP connection to close *all* open connections
+            
             _state = GPRS_STATE_WAIT_DEACTIVATE_IP_RESPONSE;
             ready = GSM_RESPONSE_IDLE;
 
@@ -316,7 +594,7 @@ class GPRS_ModemUrcHandler : public ModemUrcHandler
             }
 
             break;
-          }
+          }         
       }
 
       return ready;
@@ -328,10 +606,24 @@ class GPRS_ModemUrcHandler : public ModemUrcHandler
     {
       String response;
 
-      MODEM.send("AT+UPSND=0,0");
+      //MODEM.send("AT+UPSND=0,0");
+      MODEM.send("AT+CIFSR;E0");
 
       if (MODEM.waitForResponse(100, &response) == GSM_RESPONSE_OK)
       {
+#if 1
+        response.replace(GSM_NL "OK" GSM_NL, "");
+        response.replace(GSM_NL, "");
+        response.trim();
+        
+        IPAddress ip;
+
+        if (ip.fromString(response))
+        {
+          return ip;
+        }
+        
+#else
         if (response.startsWith("+UPSND: 0,0,\"") && response.endsWith("\""))
         {
           response.remove(0, 13);
@@ -344,6 +636,7 @@ class GPRS_ModemUrcHandler : public ModemUrcHandler
             return ip;
           }
         }
+#endif        
       }
 
       return IPAddress(0, 0, 0, 0);
@@ -493,9 +786,10 @@ class GSMClient_ModemUrcHandler : public ModemUrcHandler
         case CLIENT_STATE_CREATE_SOCKET:
           {
             MODEM.setResponseDataStorage(&_response);
-            MODEM.send("AT+USOCR=6");
+            //MODEM.send("AT+USOCR=6");
 
-            _state = CLIENT_STATE_WAIT_CREATE_SOCKET_RESPONSE;
+            //_state = CLIENT_STATE_WAIT_CREATE_SOCKET_RESPONSE;
+            _state = CLIENT_STATE_CONNECT;
             ready = GSM_RESPONSE_IDLE;
 
             break;
@@ -526,9 +820,10 @@ class GSMClient_ModemUrcHandler : public ModemUrcHandler
             break;
           }
 
+        // TO DO SSL
         case CLIENT_STATE_ENABLE_SSL:
           {
-            MODEM.sendf("AT+USOSEC=%d,1,0", _socket);
+            //MODEM.sendf("AT+USOSEC=%d,1,0", _socket);
 
             _state = CLIENT_STATE_WAIT_ENABLE_SSL_RESPONSE;
             ready = GSM_RESPONSE_IDLE;
@@ -554,7 +849,7 @@ class GSMClient_ModemUrcHandler : public ModemUrcHandler
 
         case CLIENT_STATE_MANAGE_SSL_PROFILE:
           {
-            MODEM.sendf("AT+USECPRF=0,0,%d", _sslprofile);
+            //MODEM.sendf("AT+USECPRF=0,0,%d", _sslprofile);
 
             _state = CLIENT_STATE_WAIT_MANAGE_SSL_PROFILE_RESPONSE;
             ready = GSM_RESPONSE_IDLE;
@@ -577,16 +872,18 @@ class GSMClient_ModemUrcHandler : public ModemUrcHandler
 
             break;
           }
+        //////////////////////////////////////////   
 
         case CLIENT_STATE_CONNECT:
           {
             if (_host != NULL)
             {
-              MODEM.sendf("AT+USOCO=%d,\"%s\",%d", _socket, _host, _port);
+              //MODEM.sendf("AT+USOCO=%d,\"%s\",%d", _socket, _host, _port);
+              MODEM.sendf("AT+CIPSTART=%d,\"TCP\",\"%s\",%d", _socket, _host, _port);
             }
             else
             {
-              MODEM.sendf("AT+USOCO=%d,\"%d.%d.%d.%d\",%d", _socket, _ip[0], _ip[1], _ip[2], _ip[3], _port);
+              MODEM.sendf("AT+CIPSTART=%d,\"%d.%d.%d.%d\",%d", _socket, _ip[0], _ip[1], _ip[2], _ip[3], _port);
             }
 
             _state = CLIENT_STATE_WAIT_CONNECT_RESPONSE;
@@ -666,7 +963,8 @@ class GSMClient_ModemUrcHandler : public ModemUrcHandler
           chunkSize = 256;
         }
 
-        command = "AT+USOWR=";
+        //command = "AT+USOWR=";
+        command = "AT+CIPSEND=";
         command += _socket;
         command += ",";
         command += chunkSize;
@@ -708,7 +1006,7 @@ class GSMClient_ModemUrcHandler : public ModemUrcHandler
     {
       GSM_LOGDEBUG1(F("GSMClient::handleUrc: usr = "), urc);
       
-      if (urc.startsWith("+UUSORD: "))
+      if (urc.startsWith("+CIPRXGET: "))
       {
         int socket = urc.charAt(9) - '0';
 
@@ -871,7 +1169,8 @@ class GSMServer_ModemUrcHandler : public ModemUrcHandler
             if (_childSockets[i].socket != -1) 
             {
               // check if socket is still alive
-              MODEM.sendf("AT+USORD=%d,0", _childSockets[i].socket);
+              //MODEM.sendf("AT+USORD=%d,0", _childSockets[i].socket);
+              MODEM.sendf("AT+CIPRXGET=2,%d,0", _childSockets[i].socket);
               
               if (MODEM.waitForResponse(10000) != GSM_RESPONSE_OK) 
               {
@@ -958,7 +1257,8 @@ class GSMServer_ModemUrcHandler : public ModemUrcHandler
           }
         }
       } 
-      else if (urc.startsWith("+UUSORD: ")) 
+      //else if (urc.startsWith("+UUSORD: ")) 
+      else if (urc.startsWith("+CIPRXGET: "))
       {
         int socket = urc.charAt(9) - '0';
 
@@ -1031,28 +1331,6 @@ class GSMUDP_ModemUrcHandler : public ModemUrcHandler
       GSM_LOGDEBUG1(F("GSMUDP::begin: OK, _socket = "), _socket);
 
       return 1;
-    }
-    
-    uint8_t begin(IPAddress ip, uint16_t port)
-    {     
-      GSM_LOGDEBUG3(F("GSMUDP::begin: IP = "), ip, F(", port = "), port);
-      
-      _txIp = ip;
-      _txHost = NULL;
-      _txPort = port;
-      
-      return ( begin(port) );
-    }
-    
-    uint8_t begin(const char *host, uint16_t port)
-    { 
-      GSM_LOGDEBUG3(F("GSMUDP::begin: host = "), host, F(", port = "), port);
-      
-      _txIp = IPAddress(0,0,0,0);     //(uint32_t)0;
-      _txHost = host;
-      _txPort = port;
-
-      return ( begin(port) );
     }
     
     ////////////////////////////////////////////////////// 
@@ -1367,4 +1645,4 @@ class GSMVoiceCall_ModemUrcHandler : public ModemUrcHandler
 
 ///////////////////////////////////////////////////////////////////////
 
-#endif    // _MODEM_SARA_R4_EXTRA_INCLUDED_H
+#endif    // _MODEM_SIM800_EXTRA_INCLUDED_H

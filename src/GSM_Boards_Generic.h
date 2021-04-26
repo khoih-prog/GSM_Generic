@@ -18,12 +18,13 @@
   You should have received a copy of the GNU General Public License along with this program.
   If not, see <https://www.gnu.org/licenses/>.  
  
-  Version: 1.3.0
+  Version: 1.3.1
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   1.2.4    K Hoang     11/03/2021 Initial public release to add support to many boards / modules besides MKRGSM 1400 / SARA U201
   1.3.0    K Hoang     31/03/2021 Add ThingStream MQTTS support. Fix SMS receive bug.
+  1.3.1    K Hoang     25/04/2021 Fix bug making ESP32 reset repeatedly.
  **********************************************************************************************************************************/
 
 #pragma once
@@ -60,9 +61,9 @@
   #define GSM_USE_SAM_DUE      true
 #endif
 
-#if ( defined(STM32F0) || defined(STM32F1) || defined(STM32F2) || defined(STM32F3)  ||defined(STM32F4) || defined(STM32F7) || \
-       defined(STM32L0) || defined(STM32L1) || defined(STM32L4) || defined(STM32H7)  ||defined(STM32G0) || defined(STM32G4) || \
-       defined(STM32WB) || defined(STM32MP1) )
+#if (  defined(STM32F0) || defined(STM32F1)  || defined(STM32F2) || defined(STM32F3)  ||defined(STM32F4) || defined(STM32F7) || \
+       defined(STM32L0) || defined(STM32L1)  || defined(STM32L4) || defined(STM32H7)  ||defined(STM32G0) || defined(STM32G4) || \
+       defined(STM32WB) || defined(STM32MP1) || defined(STM32L5) )
   #if defined(GSM_USE_STM32)
     #undef GSM_USE_STM32
   #endif
@@ -332,9 +333,9 @@
   #endif
   
   #if !( defined(GSM_RESETN) && defined(GSM_DTR) )
-    #warning Using default GSM_RESETN(10), GSM_DTR(11)
-    #define GSM_RESETN  (10u)
-    #define GSM_DTR     (11u)
+    #warning Using default GSM_RESETN(D3), GSM_DTR(D4)
+    #define GSM_RESETN  (D3)
+    #define GSM_DTR     (D4)
 
   #else
     #warning Using GSM_RESETN and GSM_DTR pins from sketch  
@@ -349,6 +350,29 @@
 
 #elif ( defined(ESP32) )
 
+  /*
+    // To add something similar to this for ESP32-C3
+    #if CONFIG_IDF_TARGET_ESP32
+    const int8_t esp32_adc2gpio[20] = {36, 37, 38, 39, 32, 33, 34, 35, -1, -1, 4, 0, 2, 15, 13, 12, 14, 27, 25, 26};
+    #elif CONFIG_IDF_TARGET_ESP32S2
+    const int8_t esp32_adc2gpio[20] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
+    #elif CONFIG_IDF_TARGET_ESP32C3
+    const int8_t esp32_adc2gpio[20] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
+    #endif 
+  */
+  #if ( ARDUINO_ESP32S2_DEV || ARDUINO_FEATHERS2 || ARDUINO_ESP32S2_THING_PLUS || ARDUINO_MICROS2 || \
+          ARDUINO_METRO_ESP32S2 || ARDUINO_MAGTAG29_ESP32S2 || ARDUINO_FUNHOUSE_ESP32S2 || \
+          ARDUINO_ADAFRUIT_FEATHER_ESP32S2_NOPSRAM )
+    #define BOARD_TYPE      "ESP32-S2"
+  #elif ( ARDUINO_ESP32C3_DEV )
+    // https://github.com/espressif/arduino-esp32/blob/master/cores/esp32/esp32-hal-gpio.c
+    #warning ESP32-C3 boards not fully supported yet. Only SPIFFS and EEPROM OK. Tempo esp32_adc2gpio to be replaced. ESPAsyncWebServer library to be fixed
+    const int8_t esp32_adc2gpio[20] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
+    #define BOARD_TYPE      "ESP32-C3"
+  #else
+    #define BOARD_TYPE      "ESP32"
+  #endif
+
   // Must define these pins for ESP32
   #if !defined(SerialGSM)
     #warning Using default SerialGSM = Serial2
@@ -359,9 +383,9 @@
   #endif
   
   #if !( defined(GSM_RESETN) && defined(GSM_DTR) )
-    #warning Using default GSM_RESETN(10), GSM_DTR(11)
-    #define GSM_RESETN  (10u)
-    #define GSM_DTR     (11u)
+    #warning Using default GSM_RESETN(33), GSM_DTR(34)
+    #define GSM_RESETN  (33u)
+    #define GSM_DTR     (34u)
 
   #else
     #warning Using GSM_RESETN and GSM_DTR pins from sketch  
@@ -398,14 +422,16 @@
   //#define SerialGSM     SERIAL_PORT_HARDWARE
 
   #if defined(STM32F0)
-    #warning STM32F0 board selected
+    #warning STM32F0 board selected, using HardwareSerial Serial1 @ pin D0/RX and D1/TX
     #define BOARD_TYPE  "STM32F0"
+    HardwareSerial Serial1(D0, D1);
   #elif defined(STM32F1)
-    #warning STM32F1 board selected
+    #warning STM32F1 board selected, using HardwareSerial Serial1 @ pin D0/RX and D1/TX
     #define BOARD_TYPE  "STM32F1"
   #elif defined(STM32F2)
     #warning STM32F2 board selected
     #define BOARD_TYPE  "STM32F2"
+    HardwareSerial Serial1(D0, D1);
   #elif defined(STM32F3)
     #warning STM32F3 board selected
     #define BOARD_TYPE  "STM32F3"
@@ -416,12 +442,12 @@
 
     #if defined(ARDUINO_NUCLEO_F767ZI)
       #warning Nucleo-144 NUCLEO_F767ZI board selected, using HardwareSerial Serial1 @ pin D0/RX and D1/TX
-      HardwareSerial Serial1(D0, D1);   // (PA3, PA2) for ARDUINO_NUCLEO_L053R8
+      HardwareSerial Serial1(D0, D1);
     #else
     
-      #warning STM32F7 board selected
+      #warning STM32F7 board selected, using HardwareSerial Serial1 @ pin D0/RX and D1/TX
       #define BOARD_TYPE  "STM32F7"
-
+      HardwareSerial Serial1(D0, D1);
     #endif
     
   #elif defined(STM32L0)
@@ -437,29 +463,40 @@
     #endif
     
   #elif defined(STM32L1)
-    #warning STM32L1 board selected
+    #warning STM32L1 board selected, using HardwareSerial Serial1 @ pin D0/RX and D1/TX
     #define BOARD_TYPE  "STM32L1"
+    HardwareSerial Serial1(D0, D1);
   #elif defined(STM32L4)
-    #warning STM32L4 board selected
+    #warning STM32L4 board selected, using HardwareSerial Serial1 @ pin D0/RX and D1/TX
     #define BOARD_TYPE  "STM32L4"
+    HardwareSerial Serial1(D0, D1);
+  #elif defined(STM32L5)
+    #warning STM32L5 board selected, using HardwareSerial Serial1 @ pin D0/RX and D1/TX
+    #define BOARD_TYPE  "STM32L5"
+    HardwareSerial Serial1(D0, D1);
   #elif defined(STM32H7)
     #warning STM32H7 board selected
     #define BOARD_TYPE  "STM32H7"
   #elif defined(STM32G0)
-    #warning STM32G0 board selected
+    #warning STM32G0 board selected, using HardwareSerial Serial1 @ pin D0/RX and D1/TX
     #define BOARD_TYPE  "STM32G0"
+    HardwareSerial Serial1(D0, D1);
   #elif defined(STM32G4)
-    #warning STM32G4 board selected
+    #warning STM32G4 board selected, using HardwareSerial Serial1 @ pin D0/RX and D1/TX
     #define BOARD_TYPE  "STM32G4"
+    HardwareSerial Serial1(D0, D1);
   #elif defined(STM32WB)
-    #warning STM32WB board selected
+    #warning STM32WB board selected, using HardwareSerial Serial1 @ pin D0/RX and D1/TX
     #define BOARD_TYPE  "STM32WB"
+    HardwareSerial Serial1(D0, D1);
   #elif defined(STM32MP1)
-    #warning STM32MP1 board selected
+    #warning STM32MP1 board selected, using HardwareSerial Serial1 @ pin D0/RX and D1/TX
     #define BOARD_TYPE  "STM32MP1"
+    HardwareSerial Serial1(D0, D1);
   #else
-    #warning STM32 unknown board selected
+    #warning STM32 unknown board selected, using HardwareSerial Serial1 @ pin D0/RX and D1/TX
     #define BOARD_TYPE  "STM32 Unknown"
+    HardwareSerial Serial1(D0, D1);
   #endif  
 
 #else

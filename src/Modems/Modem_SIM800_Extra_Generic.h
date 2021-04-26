@@ -1,5 +1,5 @@
 /*********************************************************************************************************************************
-  Modem_SaraR4_Extra_Generic.h
+  Modem_SIM800_Extra_Generic.h
   
   For ESP8266, ESP32, SAMD21/SAMD51, nRF52, SAM DUE, Teensy and STM32 with GSM modules
   
@@ -29,8 +29,8 @@
 
 #pragma once
 
-#ifndef _MODEM_SARA_R4_EXTRA_INCLUDED_H
-#define _MODEM_SARA_R4_EXTRA_INCLUDED_H
+#ifndef _MODEM_SIM800_EXTRA_INCLUDED_H
+#define _MODEM_SIM800_EXTRA_INCLUDED_H
 
 ///////////////////////////////////////////////////////////////////////
 
@@ -54,16 +54,18 @@ class GPRS_ModemUrcHandler : public ModemUrcHandler
           {
             break;
           }
-
+         
         case GPRS_STATE_ATTACH:
           {
-            MODEM.send("AT+CGATT=1");
-            _state = GPRS_STATE_WAIT_ATTACH_RESPONSE;
+            MODEM.send("AT+CGATT=1");  // Attach to GPRS
+                
+            _state = GPRS_STATE_WAIT_ATTACH_GPRS_RESPONSE;
             ready = GSM_RESPONSE_IDLE;
+
             break;
           }
 
-        case GPRS_STATE_WAIT_ATTACH_RESPONSE:
+        case GPRS_STATE_WAIT_ATTACH_GPRS_RESPONSE:
           {
             if (ready > GSM_RESPONSE_OK)
             {
@@ -72,22 +74,24 @@ class GPRS_ModemUrcHandler : public ModemUrcHandler
             }
             else
             {
-              _state = GPRS_STATE_SET_APN;
+              _state = GPRS_STATE_SET_MULTI_IP;
               ready = GSM_RESPONSE_IDLE;
             }
 
             break;
           }
-        case GPRS_STATE_SET_APN:
+          
+        case GPRS_STATE_SET_MULTI_IP:
           {
-            MODEM.sendf("AT+UPSD=0,1,\"%s\"", _apn);
-            _state = GPRS_STATE_WAIT_SET_APN_RESPONSE;
+            MODEM.send("AT+CIPMUX=1");  // Set to multi-IP
+                
+            _state = GPRS_STATE_WAIT_SET_MULTI_IP_RESPONSE;
             ready = GSM_RESPONSE_IDLE;
 
             break;
           }
 
-        case GPRS_STATE_WAIT_SET_APN_RESPONSE:
+        case GPRS_STATE_WAIT_SET_MULTI_IP_RESPONSE:
           {
             if (ready > GSM_RESPONSE_OK)
             {
@@ -96,37 +100,26 @@ class GPRS_ModemUrcHandler : public ModemUrcHandler
             }
             else
             {
-              _state = GPRS_STATE_SET_AUTH_MODE;
+              _state = GPRS_STATE_QUICK_SEND;
               ready = GSM_RESPONSE_IDLE;
             }
 
             break;
           }
-
-#if 1
-
-        case GPRS_STATE_SET_AUTH_MODE:
+          
+        // Put in "quick send" mode (thus no extra "Send OK")
+        // Set to get data manually
+        case GPRS_STATE_QUICK_SEND:
           {
-            //MODEM.sendf("AT+UPSD=0,6,3");
-            _state = GPRS_STATE_SET_USERNAME;
+            MODEM.send("AT+CIPQSEND=1");  // Put in "quick send" mode
+                
+            _state = GPRS_STATE_WAIT_QUICK_SEND_RESPONSE;
             ready = GSM_RESPONSE_IDLE;
 
             break;
           }
 
-#else
-
-        case GPRS_STATE_SET_AUTH_MODE:
-          {
-            MODEM.sendf("AT+UPSD=0,6,3");
-            _state = GPRS_STATE_WAIT_SET_AUTH_MODE_RESPONSE;
-            ready = GSM_RESPONSE_IDLE;
-
-            break;
-          }
-#endif
-
-        case GPRS_STATE_WAIT_SET_AUTH_MODE_RESPONSE:
+        case GPRS_STATE_WAIT_QUICK_SEND_RESPONSE:
           {
             if (ready > GSM_RESPONSE_OK)
             {
@@ -135,23 +128,25 @@ class GPRS_ModemUrcHandler : public ModemUrcHandler
             }
             else
             {
-              _state = GPRS_STATE_SET_USERNAME;
+              _state = GPRS_STATE_START_TASK;
               ready = GSM_RESPONSE_IDLE;
             }
 
             break;
           }
-
-        case GPRS_STATE_SET_USERNAME:
+          
+        case GPRS_STATE_START_TASK:
           {
-            MODEM.sendf("AT+UPSD=0,2,\"%s\"", _username);
-            _state = GPRS_STATE_WAIT_SET_USERNAME_RESPONSE;
+            // Start Task and Set APN, USER NAME, PASSWORD
+            MODEM.sendf("AT+CSTT=\"%s\",\"%s\",\"%s\"", _apn, _username, _password);  
+                
+            _state = GPRS_STATE_WAIT_START_TASK_RESPONSE;
             ready = GSM_RESPONSE_IDLE;
 
             break;
           }
 
-        case GPRS_STATE_WAIT_SET_USERNAME_RESPONSE:
+        case GPRS_STATE_WAIT_START_TASK_RESPONSE:
           {
             if (ready > GSM_RESPONSE_OK)
             {
@@ -160,23 +155,24 @@ class GPRS_ModemUrcHandler : public ModemUrcHandler
             }
             else
             {
-              _state = GPRS_STATE_SET_PASSWORD;
+              _state = GPRS_STATE_WIRELESS_UP;
               ready = GSM_RESPONSE_IDLE;
             }
 
             break;
           }
-
-        case GPRS_STATE_SET_PASSWORD:
+          
+          case GPRS_STATE_WIRELESS_UP:
           {
-            MODEM.sendf("AT+UPSD=0,3,\"%s\"", _password);
-            _state = GPRS_STATE_WAIT_SET_PASSWORD_RESPONSE;
+            MODEM.send("AT+CIICR");  // Bring Up Wireless Connection with GPRS or CSD
+                
+            _state = GPRS_STATE_WAIT_WIRELESS_UP_RESPONSE;
             ready = GSM_RESPONSE_IDLE;
 
             break;
           }
 
-        case GPRS_STATE_WAIT_SET_PASSWORD_RESPONSE:
+        case GPRS_STATE_WAIT_WIRELESS_UP_RESPONSE:
           {
             if (ready > GSM_RESPONSE_OK)
             {
@@ -185,23 +181,23 @@ class GPRS_ModemUrcHandler : public ModemUrcHandler
             }
             else
             {
-              _state = GPRS_STATE_SET_DYNAMIC_IP;
+              _state = GPRS_STATE_GET_IP;
               ready = GSM_RESPONSE_IDLE;
             }
 
             break;
           }
-
-        case GPRS_STATE_SET_DYNAMIC_IP:
+          
+        case GPRS_STATE_GET_IP:
           {
-            MODEM.send("AT+UPSD=0,7,\"0.0.0.0\"");
-            _state = GPRS_STATE_WAIT_SET_DYNAMIC_IP_RESPONSE;
+            MODEM.send("AT+CIFSR;E0");
+            _state = GPRS_STATE_WAIT_GET_IP_RESPONSE;
             ready = GSM_RESPONSE_IDLE;
 
             break;
           }
 
-        case GPRS_STATE_WAIT_SET_DYNAMIC_IP_RESPONSE:
+        case GPRS_STATE_WAIT_GET_IP_RESPONSE:
           {
             if (ready > GSM_RESPONSE_OK)
             {
@@ -210,51 +206,26 @@ class GPRS_ModemUrcHandler : public ModemUrcHandler
             }
             else
             {
-              _state = GPRS_STATE_ACTIVATE_IP;
+              _state = GPRS_STATE_CONFIG_DNS;
               ready = GSM_RESPONSE_IDLE;
             }
 
             break;
           }
-
-        case GPRS_STATE_ACTIVATE_IP:
+          
+        case GPRS_STATE_CONFIG_DNS:
           {
-            MODEM.send("AT+UPSDA=0,3");
-            _state = GPRS_STATE_WAIT_ACTIVATE_IP_RESPONSE;
+            // Using Google DNS
+            MODEM.send("AT+CDNSCFG=\"8.8.8.8\",\"8.8.4.4\"");
+            _state = GPRS_STATE_WAIT_CONFIG_DNS_RESPONSE;
             ready = GSM_RESPONSE_IDLE;
 
             break;
           }
 
-        case GPRS_STATE_WAIT_ACTIVATE_IP_RESPONSE:
+        case GPRS_STATE_WAIT_CONFIG_DNS_RESPONSE:
           {
             if (ready > GSM_RESPONSE_OK)
-            {
-              _state = GPRS_STATE_IDLE;
-              _status = GSM_ERROR;
-            }
-            else
-            {
-              _state = GPRS_STATE_CHECK_PROFILE_STATUS;
-              ready = GSM_RESPONSE_IDLE;
-            }
-
-            break;
-          }
-
-        case GPRS_STATE_CHECK_PROFILE_STATUS:
-          {
-            MODEM.setResponseDataStorage(&_response);
-            MODEM.send("AT+UPSND=0,8");
-            _state = GPRS_STATE_WAIT_CHECK_PROFILE_STATUS_RESPONSE;
-            ready = GSM_RESPONSE_IDLE;
-
-            break;
-          }
-
-        case GPRS_STATE_WAIT_CHECK_PROFILE_STATUS_RESPONSE:
-          {
-            if (ready > GSM_RESPONSE_OK || !_response.endsWith(",1"))
             {
               _state = GPRS_STATE_IDLE;
               _status = GSM_ERROR;
@@ -267,10 +238,11 @@ class GPRS_ModemUrcHandler : public ModemUrcHandler
 
             break;
           }
-
+                            
         case GPRS_STATE_DEACTIVATE_IP:
           {
-            MODEM.send("AT+UPSDA=0,4");
+            MODEM.send("AT+CIPSHUT");   // Shut the TCP/IP connection to close *all* open connections
+            
             _state = GPRS_STATE_WAIT_DEACTIVATE_IP_RESPONSE;
             ready = GSM_RESPONSE_IDLE;
 
@@ -316,7 +288,7 @@ class GPRS_ModemUrcHandler : public ModemUrcHandler
             }
 
             break;
-          }
+          }         
       }
 
       return ready;
@@ -328,22 +300,20 @@ class GPRS_ModemUrcHandler : public ModemUrcHandler
     {
       String response;
 
-      MODEM.send("AT+UPSND=0,0");
+      MODEM.send("AT+CIFSR;E0");
 
       if (MODEM.waitForResponse(100, &response) == GSM_RESPONSE_OK)
       {
-        if (response.startsWith("+UPSND: 0,0,\"") && response.endsWith("\""))
+        response.replace(GSM_NL "OK" GSM_NL, "");
+        response.replace(GSM_NL, "");
+        response.trim();
+        
+        IPAddress ip;
+
+        if (ip.fromString(response))
         {
-          response.remove(0, 13);
-          response.remove(response.length() - 1);
-
-          IPAddress ip;
-
-          if (ip.fromString(response))
-          {
-            return ip;
-          }
-        }
+          return ip;
+        }     
       }
 
       return IPAddress(0, 0, 0, 0);
@@ -355,18 +325,21 @@ class GPRS_ModemUrcHandler : public ModemUrcHandler
     {
       String response;
 
-      MODEM.sendf("AT+UDNSRN=0,\"%s\"", hostname);
+      MODEM.sendf("AT+CDNSGIP=0,\"%s\"", hostname);
+
 
       if (MODEM.waitForResponse(70000, &response) != GSM_RESPONSE_OK)
       {
         return 0;
       }
 
-      if (!response.startsWith("+UDNSRN: \"") || !response.endsWith("\""))
+      // KH to check
+      if (!response.startsWith("+CDNSGIP:1 \"") || !response.endsWith("\""))
       {
         return 0;
       }
 
+      // KH to check
       response.remove(0, 10);
       response.remove(response.length() - 1);
 
@@ -383,11 +356,17 @@ class GPRS_ModemUrcHandler : public ModemUrcHandler
     int ping(const char* hostname, uint8_t ttl)
     {
       String response;
+      
+      GSM_LOGDEBUG3(F("GPRS ping: UART hostname = "), hostname, ", ttl = ", ttl); 
 
       _pingResult = 0;
-
-      MODEM.sendf("AT+UPING=\"%s\",1,32,5000,%d", hostname, ttl);
-
+      
+      // SIM800/900 => AT+CIPPING=<IPaddr>[,<retryNum>[,<dataLen>[,<timeout>[,<ttl>]]]]
+      MODEM.sendf("AT+CIPPING=\"%s\",1,32,200,%d", hostname, ttl);
+      
+      //GSM_UNUSED(ttl);
+      //MODEM.sendf("AT+CIPPING=\"%s\"", hostname);
+      
       if (MODEM.waitForResponse() != GSM_RESPONSE_OK)
       {
         return GPRS_PING_ERROR;
@@ -410,49 +389,36 @@ class GPRS_ModemUrcHandler : public ModemUrcHandler
 
     void handleUrc(const String& urc)
     {
-      if (urc.startsWith("+UUPINGER: "))
-      {
-        if (urc.endsWith(",8"))
-        {
-          _pingResult = GPRS_PING_UNKNOWN_HOST;
-        }
-        else
-        {
-          _pingResult = GPRS_PING_ERROR;
-        }
-      }
-      else if (urc.startsWith("+UUPING: "))
+      // +CIPPING : <replyId>,<Ip Address>,<replyTime>,<ttl>
+      
+      if (urc.startsWith("+CIPPING: "))
       {
         int lastCommaIndex = urc.lastIndexOf(',');
 
+        // No comma => error
         if (lastCommaIndex == -1)
         {
           _pingResult = GPRS_PING_ERROR;
         }
         else
-        {
-          _pingResult = urc.substring(lastCommaIndex + 1).toInt();
-
-          if (_pingResult == -1)
-          {
-            _pingResult = GPRS_PING_TIMEOUT;
-          }
-          else if (_pingResult <= 0)
-          {
-            _pingResult = GPRS_PING_ERROR;
-          }
+        {        
+          // URC
+          // +CIPPING : <replyId>,<Ip Address>,<replyTime>,<ttl>
+          String result;
+          
+          result = substringAfterSymbol(urc, ',');                          // Skip <replyId>
+          
+          GSM_LOGDEBUG1(F("GPRS::handleUrc: Receive PING from IPAddress = "), substringBeforeSymbol(result, ',') ); 
+                        
+          result = substringAfterSymbol(result, ',');                       // Skip <Ip Address>                      
+            
+          _pingResult = substringBeforeSymbol(result, ',').toInt();         // Get <replyTime>       
         }
       }
-      else if (urc.startsWith("+UUPSDD: "))
+      else if ( urc.endsWith("ERROR") || urc.startsWith("+CME ERROR: ") )
       {
-        int profileId = urc.charAt(urc.length() - 1) - '0';
-
-        if (profileId == 0)
-        {
-          // disconnected
-          _status = GSM_IDLE;
-        }
-      }
+        _pingResult = GPRS_PING_ERROR;
+      }  
     }
     
     protected:
@@ -493,9 +459,8 @@ class GSMClient_ModemUrcHandler : public ModemUrcHandler
         case CLIENT_STATE_CREATE_SOCKET:
           {
             MODEM.setResponseDataStorage(&_response);
-            MODEM.send("AT+USOCR=6");
-
-            _state = CLIENT_STATE_WAIT_CREATE_SOCKET_RESPONSE;
+            
+            _state = CLIENT_STATE_CONNECT;
             ready = GSM_RESPONSE_IDLE;
 
             break;
@@ -526,9 +491,11 @@ class GSMClient_ModemUrcHandler : public ModemUrcHandler
             break;
           }
 
+#if !(GSM_MODEM_SIM900 || TINY_GSM_MODEM_SIM900)
+        // TO DO SSL (not supported for SIM900)
         case CLIENT_STATE_ENABLE_SSL:
           {
-            MODEM.sendf("AT+USOSEC=%d,1,0", _socket);
+            //MODEM.sendf("AT+USOSEC=%d,1,0", _socket);
 
             _state = CLIENT_STATE_WAIT_ENABLE_SSL_RESPONSE;
             ready = GSM_RESPONSE_IDLE;
@@ -554,7 +521,7 @@ class GSMClient_ModemUrcHandler : public ModemUrcHandler
 
         case CLIENT_STATE_MANAGE_SSL_PROFILE:
           {
-            MODEM.sendf("AT+USECPRF=0,0,%d", _sslprofile);
+            //MODEM.sendf("AT+USECPRF=0,0,%d", _sslprofile);
 
             _state = CLIENT_STATE_WAIT_MANAGE_SSL_PROFILE_RESPONSE;
             ready = GSM_RESPONSE_IDLE;
@@ -577,16 +544,20 @@ class GSMClient_ModemUrcHandler : public ModemUrcHandler
 
             break;
           }
+#endif          
+        //////////////////////////////////////////   
 
         case CLIENT_STATE_CONNECT:
           {
             if (_host != NULL)
             {
-              MODEM.sendf("AT+USOCO=%d,\"%s\",%d", _socket, _host, _port);
+              // KH test, hardcode _socket
+              _socket = 1;
+              MODEM.sendf("AT+CIPSTART=%d,\"TCP\",\"%s\",%d", _socket, _host, _port);
             }
             else
             {
-              MODEM.sendf("AT+USOCO=%d,\"%d.%d.%d.%d\",%d", _socket, _ip[0], _ip[1], _ip[2], _ip[3], _port);
+              MODEM.sendf("AT+CIPSTART=%d,\"%d.%d.%d.%d\",%d", _socket, _ip[0], _ip[1], _ip[2], _ip[3], _port);
             }
 
             _state = CLIENT_STATE_WAIT_CONNECT_RESPONSE;
@@ -656,36 +627,40 @@ class GSMClient_ModemUrcHandler : public ModemUrcHandler
       String command;
 
       command.reserve(19 + (size > 256 ? 256 : size) * 2);
+      
+      GSM_LOGDEBUG3(F("write: buf = "), (char*) buf, ", size = ", size);
 
       while (size)
       {
-        size_t chunkSize = size;
+        //////
+        
+        size_t chunkSize = (size > 256) ? 256 : size;
 
-        if (chunkSize > 256)
-        {
-          chunkSize = 256;
-        }
-
-        command = "AT+USOWR=";
+        command = "AT+CIPSEND=";
         command += _socket;
         command += ",";
         command += chunkSize;
-        command += ",\"";
+        
+        GSM_LOGDEBUG1(F("write: AT command = "), command);
 
+        MODEM.send(command);
+        
+        MODEM.waitForResponse(100);
+        
+        command = "\"";
+        
         for (size_t i = 0; i < chunkSize; i++)
         {
-          byte b = buf[i + written];
-
-          byte n1 = (b >> 4) & 0x0f;
-          byte n2 = (b & 0x0f);
-
-          command += (char)(n1 > 9 ? 'A' + n1 - 10 : '0' + n1);
-          command += (char)(n2 > 9 ? 'A' + n2 - 10 : '0' + n2);
+          command += (char) buf[i + written];
         }
 
         command += "\"";
+        
+        GSM_LOGDEBUG1(F("write: AT data = "), command);
 
         MODEM.send(command);
+        
+        //////
 
         if (_writeSync)
         {
@@ -697,6 +672,8 @@ class GSMClient_ModemUrcHandler : public ModemUrcHandler
 
         written += chunkSize;
         size -= chunkSize;
+        
+        GSM_LOGDEBUG3(F("write: written = "), written, ", remaining size = ", size);
       }
 
       return written;
@@ -706,10 +683,14 @@ class GSMClient_ModemUrcHandler : public ModemUrcHandler
    
     virtual void handleUrc(const String& urc)
     {
-      GSM_LOGDEBUG1(F("GSMClient::handleUrc: usr = "), urc);
+      GSM_LOGDEBUG1(F("GSMClient::handleUrc: urc = "), urc);
       
-      if (urc.startsWith("+UUSORD: "))
+      // URC
+      //+CIPRXGET: 2,<id>,<reqlength>,<cnflength>[,<IPADDRESS>:<PORT>]
+      //1234567890...
+      if (urc.startsWith("+CIPRXGET: "))
       {
+        // KH to fix here
         int socket = urc.charAt(9) - '0';
 
         if (socket == _socket)
@@ -719,6 +700,7 @@ class GSMClient_ModemUrcHandler : public ModemUrcHandler
             _connected = false;
           }
         }
+        //////
       }
     }
     
@@ -770,7 +752,9 @@ class GSMServer_ModemUrcHandler : public ModemUrcHandler
         case SERVER_STATE_CREATE_SOCKET:
           {
             MODEM.setResponseDataStorage(&_response);
-            MODEM.send("AT+USOCR=6");
+            
+            // 6: Create TCP socket
+            //MODEM.send("AT+USOCR=6");
 
             _state = SERVER_STATE_WAIT_CREATE_SOCKET_RESPONSE;
             ready = GSM_RESPONSE_IDLE;
@@ -871,7 +855,8 @@ class GSMServer_ModemUrcHandler : public ModemUrcHandler
             if (_childSockets[i].socket != -1) 
             {
               // check if socket is still alive
-              MODEM.sendf("AT+USORD=%d,0", _childSockets[i].socket);
+              //MODEM.sendf("AT+USORD=%d,0", _childSockets[i].socket);
+              MODEM.sendf("AT+CIPRXGET=2,%d,0", _childSockets[i].socket);
               
               if (MODEM.waitForResponse(10000) != GSM_RESPONSE_OK) 
               {
@@ -958,10 +943,16 @@ class GSMServer_ModemUrcHandler : public ModemUrcHandler
           }
         }
       } 
-      else if (urc.startsWith("+UUSORD: ")) 
+      //else if (urc.startsWith("+UUSORD: ")) 
+      else if (urc.startsWith("+CIPRXGET: "))
       {
+        // KH to fix here
+        // URC
+        //+CIPRXGET: 2,<id>,<reqlength>,<cnflength>[,<IPADDRESS>:<PORT>]
+        //1234567890...
         int socket = urc.charAt(9) - '0';
-
+        // KH to fix here
+        
         for (int i = 0; i < MAX_CHILD_SOCKETS; i++) 
         {
           if (_childSockets[i].socket == socket) 
@@ -1004,27 +995,55 @@ class GSMUDP_ModemUrcHandler : public ModemUrcHandler
   public:
   
     uint8_t begin(uint16_t port)
-    {
-      String response;
-      
+    {     
       GSM_LOGDEBUG1(F("GSMUDP::begin: port = "), port);
+    
+      return (begin(IPAddress(0,0,0,0), port));
+    }
+    
+    uint8_t begin(IPAddress ip, uint16_t port)
+    {      
+      GSM_LOGDEBUG3(F("GSMUDP::begin: IP = "), ip, F(", port = "), port);
+      
+      _txIp = ip;
+      _txHost = NULL;
+      _txPort = port;
 
-      MODEM.send("AT+USOCR=17");
+      // KH test, hardcode _socket
+      _socket = 1;
 
-      if (MODEM.waitForResponse(100, &response) != GSM_RESPONSE_OK)
+      MODEM.sendf("AT+CIPSTART=%d,\"UDP\",\"%d.%d.%d.%d\",%d", _socket, _txIp[0], _txIp[1], _txIp[2], _txIp[3], _txPort);
+      
+      if (MODEM.waitForResponse() != GSM_RESPONSE_OK)
       {
         GSM_LOGDEBUG(F("GSMUDP::begin: Error no modem response"));
         
         return 0;
       }
+     
+      GSM_LOGDEBUG1(F("GSMUDP::begin: OK, _socket = "), _socket);
 
-      _socket = response.charAt(response.length() - 1) - '0';
+      return 1;
+    }
+    
+    
+    uint8_t begin(const char *host, uint16_t port)
+    {
+      GSM_LOGDEBUG3(F("GSMUDP::begin: host = "), host, F(", port = "), port);
+      
+      _txIp = IPAddress(0,0,0,0);     //(uint32_t)0;
+      _txHost = host;
+      _txPort = port;
+      
+      // KH test, hardcode _socket
+      _socket = 1;
 
-      MODEM.sendf("AT+USOLI=%d,%d", _socket, port);
+      MODEM.sendf("AT+CIPSTART=%d,\"UDP\",\"%s\",%d", _socket, _txHost, _txPort);
 
-      if (MODEM.waitForResponse(10000) != GSM_RESPONSE_OK)
+      if (MODEM.waitForResponse() != GSM_RESPONSE_OK)
       {
-        stop();
+        GSM_LOGDEBUG(F("GSMUDP::begin: Error no modem response"));
+        
         return 0;
       }
       
@@ -1032,29 +1051,6 @@ class GSMUDP_ModemUrcHandler : public ModemUrcHandler
 
       return 1;
     }
-    
-    uint8_t begin(IPAddress ip, uint16_t port)
-    {     
-      GSM_LOGDEBUG3(F("GSMUDP::begin: IP = "), ip, F(", port = "), port);
-      
-      _txIp = ip;
-      _txHost = NULL;
-      _txPort = port;
-      
-      return ( begin(port) );
-    }
-    
-    uint8_t begin(const char *host, uint16_t port)
-    { 
-      GSM_LOGDEBUG3(F("GSMUDP::begin: host = "), host, F(", port = "), port);
-      
-      _txIp = IPAddress(0,0,0,0);     //(uint32_t)0;
-      _txHost = host;
-      _txPort = port;
-
-      return ( begin(port) );
-    }
-    
     ////////////////////////////////////////////////////// 
 
     void stop()
@@ -1086,7 +1082,33 @@ class GSMUDP_ModemUrcHandler : public ModemUrcHandler
         command.reserve(41 + _txSize * 2);
       }
 
-      command += "AT+USOST=";
+#if 1
+        command = "AT+CIPSEND=";
+        command += _socket;
+        command += ",";
+        command += _txSize;
+        
+        GSM_LOGDEBUG1(F("write: AT command = "), command);
+
+        MODEM.send(command);
+        
+        MODEM.waitForResponse(100);
+        
+        //command = "\"";
+        command = "";
+        
+        for (size_t i = 0; i < _txSize; i++)
+        {
+          command += (char) _txBuffer[i];
+        }
+
+        //command += "\"";
+        
+        GSM_LOGDEBUG1(F("write: AT command = "), command);
+
+        MODEM.send(command);
+#else
+      command = "AT+CIPSEND=";
       command += _socket;
       command += ",\"";
 
@@ -1110,21 +1132,18 @@ class GSMUDP_ModemUrcHandler : public ModemUrcHandler
       command += ",";
       command += _txSize;
       command += ",\"";
-
+      
       for (size_t i = 0; i < _txSize; i++)
       {
-        byte b = _txBuffer[i];
-
-        byte n1 = (b >> 4) & 0x0f;
-        byte n2 = (b & 0x0f);
-
-        command += (char)(n1 > 9 ? 'A' + n1 - 10 : '0' + n1);
-        command += (char)(n2 > 9 ? 'A' + n2 - 10 : '0' + n2);
+        command += (char) _txBuffer[i];
       }
-
+      
       command += "\"";
+      
+      GSM_LOGDEBUG1(F("UDP endPacket: AT command = "), command);
 
       MODEM.send(command);
+#endif
 
       if (MODEM.waitForResponse() == GSM_RESPONSE_OK) 
       {
@@ -1142,7 +1161,7 @@ class GSMUDP_ModemUrcHandler : public ModemUrcHandler
     {
       MODEM.poll();
 
-      if (_socket < 0) 
+      if (_socket < 0)
       {
         return 0;
       }
@@ -1153,10 +1172,14 @@ class GSMUDP_ModemUrcHandler : public ModemUrcHandler
       }
       
       _packetReceived = false;
+      
+      //KH to fix
 
       String response;
 
-      MODEM.sendf("AT+USORF=%d,%d", _socket, sizeof(_rxBuffer));
+      // AT+CIPRXGET=<mode>[,<reqlength>]
+      // Mode 2 ????
+      MODEM.sendf("AT+CIPRXGET=%d,%d", 2 /*_socket*/, sizeof(_rxBuffer));
       
       if (MODEM.waitForResponse(10000, &response) != GSM_RESPONSE_OK) 
       {
@@ -1167,49 +1190,42 @@ class GSMUDP_ModemUrcHandler : public ModemUrcHandler
       {
         return 0;
       }
-
-      response.remove(0, 11);
-
-      int firstQuoteIndex = response.indexOf('"');
       
-      if (firstQuoteIndex == -1) 
+      // URC
+      //+CIPRXGET: 2,<mux_id>,<reqlength>,<cnflength>[,<IPADDRESS>:<PORT>]
+      //1234567890...
+      if (response.startsWith("+CIPRXGET: "))
+      {
+        String result;
+        
+        result = substringAfterSymbol(response, ',');                     // Skip Rx mode
+        result = substringAfterSymbol(result, ',');                       // Skip <mux_id>       
+          
+        int requestLength = substringBeforeSymbol(result, ',').toInt();   // Get <reqlength>
+        
+        result = substringAfterSymbol(result, ',');                       // Skip <reqlength>
+        
+        // KH to fix here. What we need to do ?
+        _rxSize = substringBeforeSymbol(result, ',').toInt();
+        
+        result = response.substring(response.indexOf('\n') + 1);          // Get <data>
+        
+        GSM_LOGDEBUG3(F("GSMUDP::handleUrc: requestLength = "), requestLength, 
+                      F(", confirmedLength _rxSize = "), _rxSize);
+        GSM_LOGDEBUG1(F("GSMUDP::handleUrc: data = "), result);              
+        
+        //////
+ 
+        _rxIndex = 0;
+        
+        memcpy(_rxBuffer, result.c_str(), _rxSize);
+      }
+      else
       {
         return 0;
       }
-
-      String ip = response.substring(0, firstQuoteIndex);
-      _rxIp.fromString(ip);
-
-      response.remove(0, firstQuoteIndex + 2);
-
-      int firstCommaIndex = response.indexOf(',');
-      
-      if (firstCommaIndex == -1) 
-      {
-        return 0;
-      }
-
-      String port = response.substring(0, firstCommaIndex);
-      
-      _rxPort = port.toInt();
-      firstQuoteIndex = response.indexOf("\"");
-
-      response.remove(0, firstQuoteIndex + 1);
-      response.remove(response.length() - 1);
-
-      _rxIndex = 0;
-      _rxSize = response.length() / 2;
-
-      for (size_t i = 0; i < _rxSize; i++) 
-      {
-        byte n1 = response[i * 2];
-        byte n2 = response[i * 2 + 1];
-       
-        n1 = charToInt(n1);
-        n2 = charToInt(n2);
-
-        _rxBuffer[i] = (n1 << 4) | n2;
-      }
+     
+      ////////////////
 
       MODEM.poll();
 
@@ -1218,31 +1234,56 @@ class GSMUDP_ModemUrcHandler : public ModemUrcHandler
        
     ////////////////////////////////////////////////////// 
   
+    // URC - Unsolicited Response Code
+    // The DCE may send responses back to the DTE indicating the outcome of the command or further 
+    // information without having received any commands by the DTE
+
+    //String substringAfterSymbol(String str, char symbol)
+    //String substringBeforeSymbol(String str, char symbol)
+    
+    ////////////////////////////////////////////////////// 
+    
     virtual void handleUrc(const String& urc)
     {
       GSM_LOGDEBUG1(F("GSMUDP::handleUrc: urc = "), urc);
-      
-      if (urc.startsWith("+UUSORF: ")) 
-      {
-        int socket = urc.charAt(9) - '0';
 
-        if (socket == _socket) 
-        {
-          _packetReceived = true;
-        }
-      } 
-      else if (urc.startsWith("+UUSOCL: ")) 
+      // URC
+      //+CIPRXGET: 2,<mux_id>,<reqlength>,<cnflength>[,<IPADDRESS>:<PORT>]
+      //1234567890...
+      if (urc.startsWith("+CIPRXGET: "))
       {
-        int socket = urc.charAt(urc.length() - 1) - '0';
-
-        if (socket == _socket) 
-        {
-          // this socket closed
-          _socket = -1;
-          _rxIndex = 0;
-          _rxSize = 0;
-        }
+        String result;
+        
+        result = substringAfterSymbol(urc, ',');                        // Skip Rx mode
+        result = substringAfterSymbol(result, ',');                     // Skip <mux_id>       
+        
+        int requestLength = substringBeforeSymbol(result, ',').toInt(); // Get <reqlength>
+        
+        result = substringAfterSymbol(result, ',');                     // Skip <reqlength>
+        
+        // KH to fix here. What we need to do ?
+        _rxSize = substringBeforeSymbol(result, ',').toInt();
+        
+        result = urc.substring(urc.indexOf('\n') + 1);                   // Get <data>
+        
+        GSM_LOGDEBUG3(F("GSMUDP::handleUrc: requestLength = "), requestLength, 
+                      F(", confirmedLength _rxSize = "), _rxSize);
+        GSM_LOGDEBUG1(F("GSMUDP::handleUrc: data = "), result);              
+        
+        //////
+ 
+        _rxIndex = 0;
+        
+        memcpy(_rxBuffer, result.c_str(), _rxSize);
       }
+      // Response to CLOSE OK from AT+CIPCLOSE to close TCP or UDP Connection
+      else if (urc.startsWith("CLOSE OK")) 
+      {
+        // this socket closed
+        //_socket = -1;
+        _rxIndex = 0;
+        _rxSize = 0;
+      }    
     }
     
     ////////////////////////////////////////////////////// 
@@ -1367,4 +1408,4 @@ class GSMVoiceCall_ModemUrcHandler : public ModemUrcHandler
 
 ///////////////////////////////////////////////////////////////////////
 
-#endif    // _MODEM_SARA_R4_EXTRA_INCLUDED_H
+#endif    // _MODEM_SIM800_EXTRA_INCLUDED_H
