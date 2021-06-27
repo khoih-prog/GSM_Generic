@@ -18,6 +18,7 @@
   * [To be Supported modems](#to-be-supported-modems)
   * [Currently supported Boards](#currently-supported-boards)
 * [Changelog](#changelog)
+  * [Release v1.4.0](#release-v140)
   * [Release v1.3.1](#release-v131)
   * [Major Release v1.3.0](#major-release-v130)
   * [Release v1.2.4](#release-v124)
@@ -35,7 +36,14 @@
       * [For core version v1.8.9-](#for-core-version-v189-)
   * [5. For Adafruit SAMD boards](#5-for-adafruit-samd-boards)
   * [6. For Seeeduino SAMD boards](#6-for-seeeduino-samd-boards)
-  * [7. For STM32 boards](#7-for-stm32-boards)
+  * [7. For STM32 boards](#7-for-stm32-boards) 
+    * [7.1. For STM32 boards to use LAN8720](#71-for-stm32-boards-to-use-lan8720)
+    * [7.2. For STM32 boards to use Serial1](#72-for-stm32-boards-to-use-serial1)
+  * [8. For RP2040-based boards using Earle Philhower arduino-pico core](#8-for-rp2040-based-boards-using-earle-philhower-arduino-pico-core)
+    * [8.1. To use BOARD_NAME](#81-to-use-board_name)
+    * [8.2. To avoid compile error relating to microsecondsToClockCycles](#82-to-avoid-compile-error-relating-to-microsecondstoclockcycles)
+* [Libraries' Patches](#libraries-patches)
+  * [1. For Adafruit_MQTT_Library](#1-for-adafruit_mqtt_library)
 * [HOWTO Install esp32 core for ESP32-S2 (Saola, AI-Thinker ESP-12K) and ESP32-C3 boards into Arduino IDE](#howto-install-esp32-core-for-esp32-s2-saola-ai-thinker-esp-12k-and-esp32-c3-boards-into-arduino-ide)
   * [1. Save the original esp32 core](#1-save-the-original-esp32-core)
   * [2. Install esp32 core v1.0.6](#2-install-esp32-core-v106)
@@ -225,10 +233,17 @@ This [**GSM_Generic** library](https://github.com/khoih-prog/GSM_Generic) curren
   - Generic Flight Controllers
   - Midatronics boards
  
+  9. RP2040-based boards, such as **NANO_RP2040_CONNECT, RASPBERRY_PI_PICO, ADAFRUIT_FEATHER_RP2040 and GENERIC_RP2040**, using [**Arduino-mbed RP2040** core](https://github.com/arduino/ArduinoCore-mbed) or [**Earle Philhower's arduino-pico** core](https://github.com/earlephilhower/arduino-pico).
+  
 ---
 ---
 
 ## Changelog
+
+### Release v1.4.0
+
+1. Add support to RP2040-based boards, such as **RASPBERRY_PI_PICO, ADAFRUIT_FEATHER_RP2040 and GENERIC_RP2040**, using [**Earle Philhower's arduino-pico core**](https://github.com/earlephilhower/arduino-pico).
+2. Add support to RP2040-based boards, such as **NANO_RP2040_CONNECT, RASPBERRY_PI_PICO, ADAFRUIT_FEATHER_RP2040 and GENERIC_RP2040**, using [**Arduino-mbed RP2040** core](https://github.com/arduino/ArduinoCore-mbed).
 
 ### Release v1.3.1
 
@@ -393,11 +408,11 @@ Whenever the above-mentioned compiler error issue is fixed with the new Arduino 
 
 #### 5. For Adafruit SAMD boards
  
- ***To be able to automatically detect and display BOARD_NAME on Adafruit SAMD (Itsy-Bitsy M4, etc) boards***, you have to copy the file [Adafruit SAMD platform.txt](Packages_Patches/adafruit/hardware/samd/1.6.4) into Adafruit samd directory (~/.arduino15/packages/adafruit/hardware/samd/1.6.4). 
+ ***To be able to automatically detect and display BOARD_NAME on Adafruit SAMD (Itsy-Bitsy M4, etc) boards***, you have to copy the file [Adafruit SAMD platform.txt](Packages_Patches/adafruit/hardware/samd/1.6.7) into Adafruit samd directory (~/.arduino15/packages/adafruit/hardware/samd/1.6.7). 
 
-Supposing the Adafruit SAMD core version is 1.6.4. This file must be copied into the directory:
+Supposing the Adafruit SAMD core version is 1.6.7. This file must be copied into the directory:
 
-- `~/.arduino15/packages/adafruit/hardware/samd/1.6.4/platform.txt`
+- `~/.arduino15/packages/adafruit/hardware/samd/1.6.7/platform.txt`
 
 Whenever a new version is installed, remember to copy this file into the new version directory. For example, new version is x.yy.zz
 This file must be copied into the directory:
@@ -419,6 +434,30 @@ This file must be copied into the directory:
 
 #### 7. For STM32 boards
 
+#### 7.1 For STM32 boards to use LAN8720
+
+To use LAN8720 on some STM32 boards 
+
+- **Nucleo-144 (F429ZI, NUCLEO_F746NG, NUCLEO_F746ZG, NUCLEO_F756ZG)**
+- **Discovery (DISCO_F746NG)**
+- **STM32F4 boards (BLACK_F407VE, BLACK_F407VG, BLACK_F407ZE, BLACK_F407ZG, BLACK_F407VE_Mini, DIYMORE_F407VGT, FK407M1)**
+
+you have to copy the files [stm32f4xx_hal_conf_default.h](Packages_Patches/STM32/hardware/stm32/1.9.0/system/STM32F4xx) and [stm32f7xx_hal_conf_default.h](Packages_Patches/STM32/hardware/stm32/1.9.0/system/STM32F7xx) into STM32 stm32 directory (~/.arduino15/packages/STM32/hardware/stm32/1.9.0/system) to overwrite the old files.
+
+Supposing the STM32 stm32 core version is 1.9.0. These files must be copied into the directory:
+
+- `~/.arduino15/packages/STM32/hardware/stm32/1.9.0/system/STM32F4xx/stm32f4xx_hal_conf_default.h` for STM32F4.
+- `~/.arduino15/packages/STM32/hardware/stm32/1.9.0/system/STM32F7xx/stm32f7xx_hal_conf_default.h` for Nucleo-144 STM32F7.
+
+Whenever a new version is installed, remember to copy this file into the new version directory. For example, new version is x.yy.zz,
+theses files must be copied into the corresponding directory:
+
+- `~/.arduino15/packages/STM32/hardware/stm32/x.yy.zz/system/STM32F4xx/stm32f4xx_hal_conf_default.h`
+- `~/.arduino15/packages/STM32/hardware/stm32/x.yy.zz/system/STM32F7xx/stm32f7xx_hal_conf_default.h
+
+
+#### 7.2 For STM32 boards to use Serial1
+
 **To use Serial1 on some STM32 boards without Serial1 definition (Nucleo-144 NUCLEO_F767ZI, Nucleo-64 NUCLEO_L053R8, etc.) boards**, you have to copy the files [STM32 variant.h](Packages_Patches/STM32/hardware/stm32/1.9.0) into STM32 stm32 directory (~/.arduino15/packages/STM32/hardware/stm32/1.9.0). You have to modify the files corresponding to your boards, this is just an illustration how to do.
 
 Supposing the STM32 stm32 core version is 1.9.0. These files must be copied into the directory:
@@ -431,6 +470,49 @@ theses files must be copied into the corresponding directory:
 
 - `~/.arduino15/packages/STM32/hardware/stm32/x.yy.zz/variants/NUCLEO_F767ZI/variant.h`
 - `~/.arduino15/packages/STM32/hardware/stm32/x.yy.zz/variants/NUCLEO_L053R8/variant.h`
+
+#### 8. For RP2040-based boards using [Earle Philhower arduino-pico core](https://github.com/earlephilhower/arduino-pico)
+
+#### 8.1 To use BOARD_NAME
+
+ **To be able to automatically detect and display BOARD_NAME on RP2040-based boards (RASPBERRY_PI_PICO, ADAFRUIT_FEATHER_RP2040, GENERIC_RP2040, etc) boards**, you have to copy the file [RP2040 platform.txt](Packages_Patches/rp2040/hardware/rp2040/1.4.0) into rp2040 directory (~/.arduino15/packages/rp2040/hardware/rp2040/1.4.0). 
+
+Supposing the rp2040 core version is 1.4.0. This file must be copied into the directory:
+
+- `~/.arduino15/packages/rp2040/hardware/rp2040/1.4.0/platform.txt`
+
+Whenever a new version is installed, remember to copy this file into the new version directory. For example, new version is x.yy.zz
+This file must be copied into the directory:
+
+- `~/.arduino15/packages/rp2040/hardware/rp2040/x.yy.zz/platform.txt`
+
+With core after v1.4.0, this step is not necessary anymore thanks to the PR [Add -DBOARD_NAME="{build.board}" #136](https://github.com/earlephilhower/arduino-pico/pull/136).
+
+#### 8.2 To avoid compile error relating to microsecondsToClockCycles
+
+Some libraries, such as [Adafruit DHT-sensor-library](https://github.com/adafruit/DHT-sensor-library), require the definition of microsecondsToClockCycles(). **To be able to compile and run on RP2040-based boards**, you have to copy the files in [**RP2040 Arduino.h**](Packages_Patches/rp2040/hardware/rp2040/1.4.0/cores/rp2040/Arduino.h) into rp2040 directory (~/.arduino15/packages/rp2040/hardware/rp2040/1.4.0).
+
+Supposing the rp2040 core version is 1.4.0. This file must be copied to replace:
+
+- `~/.arduino15/packages/rp2040/hardware/rp2040/1.4.0/cores/rp2040/Arduino.h`
+
+Whenever a new version is installed, remember to copy this file into the new version directory. For example, new version is x.yy.zz
+This file must be copied to replace:
+
+- `~/.arduino15/packages/rp2040/hardware/rp2040/x.yy.zz/cores/rp2040/Arduino.h`
+
+With core after v1.4.0, this step is not necessary anymore thanks to the PR [Add defs for compatibility #142](https://github.com/earlephilhower/arduino-pico/pull/142).
+
+---
+---
+
+### Libraries' Patches
+
+#### 1. For Adafruit_MQTT_Library
+
+To avoid `dtostrf` compile error in some MQTT-related examples, fix the [`Adafruit_MQTT_Library`](https://github.com/adafruit/Adafruit_MQTT_Library) by copying the following file into the `~/Arduino/libraries/Adafruit_MQTT_Library` directory to overwrite the old file:
+
+- [Adafruit_MQTT_Library.cpp](LibraryPatches/Adafruit_MQTT_Library/Adafruit_MQTT.cpp)
 
 ---
 ---
@@ -1964,7 +2046,7 @@ Check [**NINA B302 ACCESSING BLYNK VIA GSM - SARA G350**](https://nina-gsm.blogs
 
 ```
 Start GSM_Blynk on NINA_B302_ublox
-GSM_Generic v1.3.1
+GSM_Generic v1.4.0
 [2485] 
     ___ __ __
    / _) / / _ _____ / / __
@@ -2061,6 +2143,11 @@ Sometimes, the library will only work if you update the board core to the newer 
 
 ## Releases
 
+### Release v1.4.0
+
+1. Add support to RP2040-based boards, such as **RASPBERRY_PI_PICO, ADAFRUIT_FEATHER_RP2040 and GENERIC_RP2040**, using [**Earle Philhower's arduino-pico core**](https://github.com/earlephilhower/arduino-pico).
+2. Add support to RP2040-based boards, such as **NANO_RP2040_CONNECT, RASPBERRY_PI_PICO, ADAFRUIT_FEATHER_RP2040 and GENERIC_RP2040**, using [**Arduino-mbed RP2040** core](https://github.com/arduino/ArduinoCore-mbed).
+
 ### Release v1.3.1
 
 1. Fix reset bug on ESP32
@@ -2109,6 +2196,9 @@ Submit issues to: [**GSM_Generic issues**](https://github.com/khoih-prog/GSM_Gen
  9. Support u-blox Sara U201 GSM/GPRS module
 10. Support u-blox Sara G3xx GSM/GPRS module
 11. Add support to STM32L5 and many remaining STM32 boards with new STM32 core v2.0.0
+12. Add support to RP2040-based boards such as RASPBERRY_PI_PICO, using [**Arduino-mbed RP2040** core](https://github.com/arduino/ArduinoCore-mbed)
+13. Add support to RP2040-based boards such as RASPBERRY_PI_PICO, using [**Earle Philhower's arduino-pico** core](https://github.com/earlephilhower/arduino-pico)
+
 
 ---
 ---

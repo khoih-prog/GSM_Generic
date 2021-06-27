@@ -1,8 +1,8 @@
 {
   "name":"GSM_Generic",
-  "version": "1.3.1",
-  "description":"Enables GSM/GRPS network connection using the GSM/GPRS modules. Use this library to make/receive voice calls, to send and receive SMS using Generic GSM/GPRS modules, such as u-blox SARA-U201, SARA-G350 module.This library also allows you to connect to internet through the GPRS networks and either use HTTP(S) Web Clients and Servers. Supporting ESP32 (including ESP32-S2, ESP32-C3), ESP8266, Teensy, SAM DUE, SAMD21, SAMD51, STM32F/L/H/G/WB/MP1, nRF52, etc. boards.",
-  "keywords":"gsm, gprs, udp, tcp, http, https, webclient, webserver, location, esp8266, esp32, esp32-s2, esp32-c3, stm32, samd, sam-due, nrf52, ublox, sara, sara-g3, lisa, sim800, sim900, SIM800A, SIM800C, SIM800L, SIM800H, SIM808, SIM868, SIM900A, SIM900D, SIM908, SIM968, SIM7000, A6, A7, M590, M95, MC60, MC60E, BG96, u-blox, ublox, Quectel, SIMCOM, AI-Thinker, LTE, LTE-M, at-commands, AT",
+  "version": "1.4.0",
+  "description":"Enables GSM/GRPS network connection using the GSM/GPRS modules. Use this library to make/receive voice calls, to send and receive SMS using Generic GSM/GPRS modules, such as u-blox SARA-U201, SARA-G350 module.This library also allows you to connect to internet through the GPRS networks and either use HTTP(S) Web Clients and Servers. Supporting ESP32 (including ESP32-S2, ESP32-C3), ESP8266, Teensy, SAM DUE, SAMD21, SAMD51, STM32F/L/H/G/WB/MP1, nRF52, RP2040-based boards, etc.",
+  "keywords":"gsm, gprs, ublox, Quectel, SIMCOM, LTE, LTE-M, esp8266, esp32, esp32-s2, esp32-c3, stm32, samd, sam-due, nrf52, sara, sara-g3, lisa, sim800, sim900, SIM800A, SIM800C, SIM800L, SIM800H, SIM808, SIM868, SIM900A, SIM900D, SIM908, SIM968, SIM7000, A6, A7, M590, M95, MC60, MC60E, BG96, u-blox, at-commands, AT, location, udp, tcp, http, https, webclient, webserver",
   "authors": 
   [
     {
