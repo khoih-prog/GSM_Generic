@@ -18,7 +18,7 @@
   You should have received a copy of the GNU General Public License along with this program.
   If not, see <https://www.gnu.org/licenses/>.
 
-  Version: 1.4.0
+  Version: 1.5.0
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
@@ -26,6 +26,7 @@
   1.3.0    K Hoang     31/03/2021 Add ThingStream MQTTS support. Fix SMS receive bug.
   1.3.1    K Hoang     25/04/2021 Fix bug making ESP32 reset repeatedly.
   1.4.0    K Hoang     28/06/2021 Add support to RP2040-based boards using Arduino mbed or Arduino-pico core
+  1.5.0    K Hoang     14/08/2021 Add support to Adafruit nRF52 core v0.22.0+
  **********************************************************************************************************************************/
 /*
   SMS receiver

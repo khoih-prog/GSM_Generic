@@ -121,5 +121,4 @@
 // libraries
 #include <GSM_Generic_Main.h>
 
-
 #endif    //defines_h
