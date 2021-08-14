@@ -18,7 +18,7 @@
   You should have received a copy of the GNU General Public License along with this program.
   If not, see <https://www.gnu.org/licenses/>.  
  
-  Version: 1.4.0
+  Version: 1.5.0
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
@@ -26,6 +26,7 @@
   1.3.0    K Hoang     31/03/2021 Add ThingStream MQTTS support. Fix SMS receive bug.
   1.3.1    K Hoang     25/04/2021 Fix bug making ESP32 reset repeatedly.
   1.4.0    K Hoang     28/06/2021 Add support to RP2040-based boards using Arduino mbed or Arduino-pico core
+  1.5.0    K Hoang     14/08/2021 Add support to Adafruit nRF52 core v0.22.0+
  **********************************************************************************************************************************/
 
 #pragma once
@@ -45,13 +46,16 @@
   #endif
   #define GSM_USE_SAMD      true
 
-#elif ( defined(NRF52840_FEATHER) || defined(NRF52832_FEATHER) || defined(NRF52_SERIES) || defined(ARDUINO_NRF52_ADAFRUIT) || \
-        defined(NRF52840_FEATHER_SENSE) || defined(NRF52840_ITSYBITSY) || defined(NRF52840_CIRCUITPLAY) || defined(NRF52840_CLUE) || \
-        defined(NRF52840_METRO) || defined(NRF52840_PCA10056) || defined(PARTICLE_XENON) || defined(NINA_B302_ublox) || defined(NINA_B112_ublox) )
+#elif (defined(NRF52840_FEATHER) || defined(NRF52832_FEATHER) || defined(NRF52_SERIES) || defined(ARDUINO_NRF52_ADAFRUIT) || \
+       defined(NRF52840_FEATHER_SENSE) || defined(NRF52840_ITSYBITSY) || defined(NRF52840_CIRCUITPLAY) || \
+       defined(NRF52840_CLUE) || defined(NRF52840_METRO) || defined(NRF52840_PCA10056) || defined(PARTICLE_XENON) || \
+       defined(MDBT50Q_RX) || defined(NINA_B302_ublox) || defined(NINA_B112_ublox) )
   #if defined(GSM_USE_NRF528XX)
     #undef GSM_USE_NRF528XX
   #endif
   #define GSM_USE_NRF528XX      true
+  
+  #include <Adafruit_TinyUSB.h>
 
 #elif ( defined(ARDUINO_SAM_DUE) || defined(__SAM3X8E__) )
   #if defined(GSM_USE_SAM_DUE)
