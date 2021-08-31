@@ -17,16 +17,6 @@
   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
   You should have received a copy of the GNU General Public License along with this program.
   If not, see <https://www.gnu.org/licenses/>.
-
-  Version: 1.5.0
-  
-  Version Modified By   Date      Comments
-  ------- -----------  ---------- -----------
-  1.2.4    K Hoang     11/03/2021 Initial public release to add support to many boards / modules besides MKRGSM 1400 / SARA U201
-  1.3.0    K Hoang     31/03/2021 Add ThingStream MQTTS support. Fix SMS receive bug.
-  1.3.1    K Hoang     25/04/2021 Fix bug making ESP32 reset repeatedly.
-  1.4.0    K Hoang     28/06/2021 Add support to RP2040-based boards using Arduino mbed or Arduino-pico core
-  1.5.0    K Hoang     14/08/2021 Add support to Adafruit nRF52 core v0.22.0+
  **********************************************************************************************************************************/
 
 /*
@@ -49,7 +39,35 @@
 
 //////////////////////////////////////////////
 
-#if !defined(ARDUINO_SAMD_MKRGSM1400)
+#if defined(ARDUINO_SAMD_MKRGSM1400)
+
+  // For original MKRGSM1400 => GSM_MODEM_UBLOX == true, GSM_MODEM_LARAR2 == false
+  // For modified MKRGSM1400 using LARA R2 => GSM_MODEM_UBLOX == false, GSM_MODEM_LARAR2 == true
+  #define GSM_MODEM_UBLOX                   false
+
+  #if GSM_MODEM_UBLOX
+    #define GSM_MODEM_LARAR2                false
+  #else
+    #define GSM_MODEM_LARAR2                true
+  #endif
+    
+  #define UBLOX_USING_RESET_PIN             true
+  #define UBLOX_USING_LOW_POWER_MODE        true
+
+  #if GSM_MODEM_UBLOX
+    #warning Using MKRGSM1400 Configuration with SARA U201
+  #elif GSM_MODEM_LARAR2
+    #warning Using MKRGSM1400 Configuration with LARA R2xx
+  #else
+    #error Must select either GSM_MODEM_UBLOX or GSM_MODEM_LARAR2
+  #endif
+  
+#else
+
+  // Optional usage of GSM_RESETN and GSM_DTR. Need to be here only when true. Default is false
+  #define UBLOX_USING_RESET_PIN             true
+  #define UBLOX_USING_LOW_POWER_MODE        true
+  
   // Override the default (and certainly not good) pins and port
   // Only for boards other than ARDUINO_SAMD_MKRGSM1400
   #if (ESP32)
@@ -89,44 +107,38 @@
 
   #warning You must connect the Modem correctly and modify the pins / Serial port here
   
+  //////////////////////////////////////////////
+  
+  #define GSM_MODEM_UBLOX             true
+  #define GSM_MODEM_SARAR4            false
+  #define GSM_MODEM_LARAR2            false
+  
+  //////////////////////////////////////////////
+  // Not supported yet
+  #define GSM_MODEM_SIM800            false
+  #define GSM_MODEM_SIM808            false
+  #define GSM_MODEM_SIM868            false
+  #define GSM_MODEM_SIM900            false
+  #define GSM_MODEM_SIM5300           false
+  #define GSM_MODEM_SIM5320           false
+  #define GSM_MODEM_SIM5360           false
+  #define GSM_MODEM_SIM7000           false
+  #define GSM_MODEM_SIM7100           false
+  #define GSM_MODEM_SIM7500           false
+  #define GSM_MODEM_SIM7600           false
+  #define GSM_MODEM_SIM7800           false
+  #define GSM_MODEM_M95               false
+  #define GSM_MODEM_BG96              false
+  #define GSM_MODEM_A6                false
+  #define GSM_MODEM_A7                false
+  #define GSM_MODEM_M590              false
+  #define GSM_MODEM_MC60              false
+  #define GSM_MODEM_MC60E             false
+  #define GSM_MODEM_XBEE              false
+  #define GSM_MODEM_SEQUANS_MONARCH   false
+  //////////////////////////////////////////////
+
 #endif
-
-//////////////////////////////////////////////
-
-// Optional usage of GSM_RESETN and GSM_DTR. Need to be here only when true. Default is false
-
-//#define UBLOX_USING_RESET_PIN             true
-//#define UBLOX_USING_LOW_POWER_MODE        true
-
-//////////////////////////////////////////////
-
-#define GSM_MODEM_UBLOX             false
-#define GSM_MODEM_SARAR4            false
-
-//////////////////////////////////////////////
-// Not supported yet
-#define GSM_MODEM_SIM800            false
-#define GSM_MODEM_SIM808            false
-#define GSM_MODEM_SIM868            false
-#define GSM_MODEM_SIM900            true
-#define GSM_MODEM_SIM5300           false
-#define GSM_MODEM_SIM5320           false
-#define GSM_MODEM_SIM5360           false
-#define GSM_MODEM_SIM7000           false
-#define GSM_MODEM_SIM7100           false
-#define GSM_MODEM_SIM7500           false
-#define GSM_MODEM_SIM7600           false
-#define GSM_MODEM_SIM7800           false
-#define GSM_MODEM_M95               false
-#define GSM_MODEM_BG96              false
-#define GSM_MODEM_A6                false
-#define GSM_MODEM_A7                false
-#define GSM_MODEM_M590              false
-#define GSM_MODEM_MC60              false
-#define GSM_MODEM_MC60E             false
-#define GSM_MODEM_XBEE              false
-#define GSM_MODEM_SEQUANS_MONARCH   false
-//////////////////////////////////////////////
 
 // BaudRate to communicate to GSM/GPRS modem. If be limit to max 115200 inside modem
 unsigned long baudRateSerialGSM  = 115200;
