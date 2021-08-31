@@ -1,5 +1,5 @@
 /*********************************************************************************************************************************
-  Modem_SaraR4_Generic.h
+  Modem_LaraR2_Generic.h
   
   For ESP8266, ESP32, SAMD21/SAMD51, nRF52, SAM DUE, Teensy and STM32 with GSM modules
   
@@ -32,8 +32,8 @@
 
 #pragma once
 
-#ifndef _MODEM_SARA_R4_INCLUDED_H
-#define _MODEM_SARA_R4_INCLUDED_H
+#ifndef _MODEM_LARA_R2_INCLUDED_H
+#define _MODEM_LARA_R2_INCLUDED_H
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -221,7 +221,7 @@ class ModemClass
       GSM_LOGDEBUG(F("begin: Check baud"));
 
       // KH, must always set baud here
-      // u-blox SARA and LISA can auto=adjust baurate, and we don't need to set baud
+      // u-blox SARA, LISA and LARA can auto=adjust baurate, and we don't need to set baud
       // unless UBLOX_USING_SET_BAUD is turned ON if modem don't have this auto feature
       if ( restart || newBaud )
       {
@@ -376,6 +376,8 @@ class ModemClass
       String name = "u-blox GSM_GPRS";
 #elif ( GSM_MODEM_SARAR4 || TINY_GSM_MODEM_SARAR4 )
       String name = "u-blox SARA_R4";
+#elif ( GSM_MODEM_LARAR2 || TINY_GSM_MODEM_LARAR2 )
+      String name = "u-blox LARA_R2";      
 #else
       String name = "";      
 #endif
@@ -2074,9 +2076,9 @@ Print* ModemClass::_debugPrint = NULL;
 
 //////////////////////////////////////////////////////
 
-#include "Modem_SaraR4_Extra_Generic.h"
+#include "Modem_LaraR2_Extra_Generic.h"
 
 
 //////////////////////////////////////////////////////
 
-#endif    // _MODEM_SARA_R4_INCLUDED_H
+#endif    // _MODEM_LARA_R2_INCLUDED_H

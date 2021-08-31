@@ -18,6 +18,7 @@
   * [To be Supported modems](#to-be-supported-modems)
   * [Currently supported Boards](#currently-supported-boards)
 * [Changelog](#changelog)
+  * [Release v1.6.0](#release-v160)
   * [Release v1.5.0](#release-v150)
   * [Release v1.4.0](#release-v140)
   * [Release v1.3.1](#release-v131)
@@ -241,6 +242,10 @@ This [**GSM_Generic** library](https://github.com/khoih-prog/GSM_Generic) curren
 
 ## Changelog
 
+### Release v1.6.0
+
+1. Add support to u-blox LARA-R2xx LTE Cat 1 Modem
+
 ### Release v1.5.0
 
 1. Add support to Adafruit nRF52 core v0.22.0+
@@ -277,12 +282,12 @@ This [**GSM_Generic** library](https://github.com/khoih-prog/GSM_Generic) curren
 ## Prerequisites
 
  1. [`Arduino IDE 1.8.15+` for Arduino](https://www.arduino.cc/en/Main/Software)
- 2. [`Teensy core v1.51`](https://www.pjrc.com/teensy/td_download.html) for Teensy (4.0, 3.6, 3.5, 3,2, 3.1, 3.0) boards and [`Teensy core v1.53+`](https://www.pjrc.com/teensy/td_download.html) for Teensy 4.1 boards using NativeEthernet.
+ 2. [`Teensy core v1.54+`](https://www.pjrc.com/teensy/td_download.html) for Teensy 4.1 boards using NativeEthernet.
  3. [`Arduino SAM DUE core v1.6.12+`](https://www.arduino.cc/en/Guide/ArduinoDue) for SAM DUE ARM Cortex-M3 boards.
  4. [`Arduino SAMD core 1.8.11+`](https://www.arduino.cc/en/Guide/ArduinoM0) for SAMD ARM Cortex-M0+ boards. [![GitHub release](https://img.shields.io/github/release/arduino/ArduinoCore-samd.svg)](https://github.com/arduino/ArduinoCore-samd/releases/latest)
- 5. [`Adafruit SAMD core 1.7.2+`](https://www.adafruit.com/) for SAMD ARM Cortex-M0+ and M4 boards (Nano 33 IoT, etc.). [![GitHub release](https://img.shields.io/github/release/adafruit/ArduinoCore-samd.svg)](https://github.com/adafruit/ArduinoCore-samd/releases/latest)
+ 5. [`Adafruit SAMD core 1.7.4+`](https://www.adafruit.com/) for SAMD ARM Cortex-M0+ and M4 boards (Nano 33 IoT, etc.). [![GitHub release](https://img.shields.io/github/release/adafruit/ArduinoCore-samd.svg)](https://github.com/adafruit/ArduinoCore-samd/releases/latest)
  6. [`Seeeduino SAMD core 1.8.1+`](https://github.com/Seeed-Studio/ArduinoCore-samd) for SAMD21/SAMD51 boards (XIAO M0, Wio Terminal, etc.). [![Latest release](https://img.shields.io/github/release/Seeed-Studio/ArduinoCore-samd.svg)](https://github.com/Seeed-Studio/ArduinoCore-samd/releases/latest/)
- 7. [`Adafruit nRF52 v0.24.0+`](https://www.adafruit.com) for nRF52 boards such as Adafruit NRF52840_FEATHER, NRF52832_FEATHER, NRF52840_FEATHER_SENSE, NRF52840_ITSYBITSY, NRF52840_CIRCUITPLAY, NRF52840_CLUE, NRF52840_METRO, NRF52840_PCA10056, PARTICLE_XENON, **NINA_B302_ublox**, etc. [![GitHub release](https://img.shields.io/github/release/adafruit/Adafruit_nRF52_Arduino.svg)](https://github.com/adafruit/Adafruit_nRF52_Arduino/releases/latest)
+ 7. [`Adafruit nRF52 v1.0.0+`](https://www.adafruit.com) for nRF52 boards such as Adafruit NRF52840_FEATHER, NRF52832_FEATHER, NRF52840_FEATHER_SENSE, NRF52840_ITSYBITSY, NRF52840_CIRCUITPLAY, NRF52840_CLUE, NRF52840_METRO, NRF52840_PCA10056, PARTICLE_XENON, **NINA_B302_ublox**, etc. [![GitHub release](https://img.shields.io/github/release/adafruit/Adafruit_nRF52_Arduino.svg)](https://github.com/adafruit/Adafruit_nRF52_Arduino/releases/latest)
  8. [`ESP8266 Core 3.0.2+`](https://github.com/esp8266/Arduino) for ESP8266-based boards. [![Latest release](https://img.shields.io/github/release/esp8266/Arduino.svg)](https://github.com/esp8266/Arduino/releases/latest/). To use ESP8266 core 2.7.1+ for LittleFS. 
  9. [`ESP32 Core 1.0.6+`](https://github.com/espressif/arduino-esp32) for ESP32-based boards. [![Latest release](https://img.shields.io/github/release/espressif/arduino-esp32.svg)](https://github.com/espressif/arduino-esp32/releases/latest/)
 10. [`ESP32-S2/C3 Core 1.0.6+`](https://github.com/espressif/arduino-esp32) for ESP32-S2/C3-based boards. Must follow [HOWTO Install esp32 core for ESP32-S2 (Saola, AI-Thinker ESP-12K) and ESP32-C3 boards into Arduino IDE](#howto-install-esp32-core-for-esp32-s2-saola-ai-thinker-esp-12k-and-esp32-c3-boards-into-arduino-ide).
@@ -321,16 +326,16 @@ The best way is to use `Arduino Library Manager`. Search for `GSM_Generic`, then
 
 #### 1. For Adafruit nRF52840 and nRF52832 boards
 
-**To be able to compile, run and automatically detect and display BOARD_NAME on nRF52840/nRF52832 boards**, you have to copy the whole [nRF52 0.24.0](Packages_Patches/adafruit/hardware/nrf52/0.24.0) directory into Adafruit nRF52 directory (~/.arduino15/packages/adafruit/hardware/nrf52/0.24.0). 
+**To be able to compile, run and automatically detect and display BOARD_NAME on nRF52840/nRF52832 boards**, you have to copy the whole [nRF52 1.0.0](Packages_Patches/adafruit/hardware/nrf52/1.0.0) directory into Adafruit nRF52 directory (~/.arduino15/packages/adafruit/hardware/nrf52/1.0.0). 
 
-Supposing the Adafruit nRF52 version is 0.24.0. These files must be copied into the directory:
-- `~/.arduino15/packages/adafruit/hardware/nrf52/0.24.0/platform.txt`
-- `~/.arduino15/packages/adafruit/hardware/nrf52/0.24.0/boards.txt`
-- `~/.arduino15/packages/adafruit/hardware/nrf52/0.24.0/variants/NINA_B302_ublox/variant.h`
-- `~/.arduino15/packages/adafruit/hardware/nrf52/0.24.0/variants/NINA_B302_ublox/variant.cpp`
-- `~/.arduino15/packages/adafruit/hardware/nrf52/0.24.0/variants/NINA_B112_ublox/variant.h`
-- `~/.arduino15/packages/adafruit/hardware/nrf52/0.24.0/variants/NINA_B112_ublox/variant.cpp`
-- **`~/.arduino15/packages/adafruit/hardware/nrf52/0.24.0/cores/nRF5/Udp.h`**
+Supposing the Adafruit nRF52 version is 1.0.0. These files must be copied into the directory:
+- `~/.arduino15/packages/adafruit/hardware/nrf52/1.0.0/platform.txt`
+- `~/.arduino15/packages/adafruit/hardware/nrf52/1.0.0/boards.txt`
+- `~/.arduino15/packages/adafruit/hardware/nrf52/1.0.0/variants/NINA_B302_ublox/variant.h`
+- `~/.arduino15/packages/adafruit/hardware/nrf52/1.0.0/variants/NINA_B302_ublox/variant.cpp`
+- `~/.arduino15/packages/adafruit/hardware/nrf52/1.0.0/variants/NINA_B112_ublox/variant.h`
+- `~/.arduino15/packages/adafruit/hardware/nrf52/1.0.0/variants/NINA_B112_ublox/variant.cpp`
+- **`~/.arduino15/packages/adafruit/hardware/nrf52/1.0.0/cores/nRF5/Udp.h`**
 
 Whenever a new version is installed, remember to copy these files into the new version directory. For example, new version is x.yy.z
 These files must be copied into the directory:
@@ -1610,57 +1615,106 @@ Select **one and only one** GSM module to use (`true`) as follows:
 ```cpp
 //////////////////////////////////////////////
 
-#if !defined(ARDUINO_SAMD_MKRGSM1400)
+#if defined(ARDUINO_SAMD_MKRGSM1400)
+
+  // For original MKRGSM1400 => GSM_MODEM_UBLOX == true, GSM_MODEM_LARAR2 == false
+  // For modified MKRGSM1400 using LARA R2 => GSM_MODEM_UBLOX == false, GSM_MODEM_LARAR2 == true
+  #define GSM_MODEM_UBLOX                   false
+
+  #if GSM_MODEM_UBLOX
+    #define GSM_MODEM_LARAR2                false
+  #else
+    #define GSM_MODEM_LARAR2                true
+  #endif
+    
+  #define UBLOX_USING_RESET_PIN             true
+  #define UBLOX_USING_LOW_POWER_MODE        true
+
+  #if GSM_MODEM_UBLOX
+    #warning Using MKRGSM1400 Configuration with SARA U201
+  #elif GSM_MODEM_LARAR2
+    #warning Using MKRGSM1400 Configuration with LARA R2xx
+  #else
+    #error Must select either GSM_MODEM_UBLOX or GSM_MODEM_LARAR2
+  #endif
+  
+#else
+
+  // Optional usage of GSM_RESETN and GSM_DTR. Need to be here only when true. Default is false
+  #define UBLOX_USING_RESET_PIN             true
+  #define UBLOX_USING_LOW_POWER_MODE        true
+  
   // Override the default (and certainly not good) pins and port
   // Only for boards other than ARDUINO_SAMD_MKRGSM1400
-  #define GSM_RESETN  (10u)
-  #define GSM_DTR     (11u)
-
-  #if !ESP8266
-    #define SerialGSM   Serial1
+  #if (ESP32)
+    #define GSM_RESETN  (33u)
+    #define GSM_DTR     (34u)
+  #elif (ESP8266)
+    #define GSM_RESETN  (D3)
+    #define GSM_DTR     (D4)
   #else
-    #warning Using default SerialGSM = Serial => can not use Serial for Debug Terminal
-
-    #define SerialGSM   Serial
+    #define GSM_RESETN  (10u)
+    #define GSM_DTR     (11u)
   #endif
 
+  #if ESP8266
+    // Using Software Serial for ESP8266, as Serial1 is TX only
+    #define GSM_USING_SOFTWARE_SERIAL     true
+  #else
+    // Optional Software Serial here for other boards, but not advised if HW Serial available
+    #define GSM_USING_SOFTWARE_SERIAL     false
+  #endif
+   
+  #if GSM_USING_SOFTWARE_SERIAL
+    #warning Using default SerialGSM = SoftwareSerial
+    
+    #define D8 (15)
+    #define D7 (13)
+    
+    #include <SoftwareSerial.h>
+    
+    SoftwareSerial swSerial(D7, D8);    // (D7, D8, false, 256); // (RX, TX, false, 256);
+    
+    #define SerialGSM   swSerial
+  #else
+    #warning Using default SerialGSM = HardwareSerial Serial1
+    #define SerialGSM   Serial1
+  #endif    // GSM_USING_SOFTWARE_SERIAL
+
   #warning You must connect the Modem correctly and modify the pins / Serial port here
+  
+  //////////////////////////////////////////////
+  
+  #define GSM_MODEM_UBLOX             false
+  #define GSM_MODEM_SARAR4            false
+  #define GSM_MODEM_LARAR2            true
+  
+  //////////////////////////////////////////////
+  // Not supported yet
+  #define GSM_MODEM_SIM800            false
+  #define GSM_MODEM_SIM808            false
+  #define GSM_MODEM_SIM868            false
+  #define GSM_MODEM_SIM900            false
+  #define GSM_MODEM_SIM5300           false
+  #define GSM_MODEM_SIM5320           false
+  #define GSM_MODEM_SIM5360           false
+  #define GSM_MODEM_SIM7000           false
+  #define GSM_MODEM_SIM7100           false
+  #define GSM_MODEM_SIM7500           false
+  #define GSM_MODEM_SIM7600           false
+  #define GSM_MODEM_SIM7800           false
+  #define GSM_MODEM_M95               false
+  #define GSM_MODEM_BG96              false
+  #define GSM_MODEM_A6                false
+  #define GSM_MODEM_A7                false
+  #define GSM_MODEM_M590              false
+  #define GSM_MODEM_MC60              false
+  #define GSM_MODEM_MC60E             false
+  #define GSM_MODEM_XBEE              false
+  #define GSM_MODEM_SEQUANS_MONARCH   false
+  //////////////////////////////////////////////
+
 #endif
-
-//////////////////////////////////////////////
-
-// Optional usage of GSM_RESETN and GSM_DTR. Need to be here only when true. Default is false
-
-//#define UBLOX_USING_RESET_PIN             true
-//#define UBLOX_USING_LOW_POWER_MODE        true
-
-//////////////////////////////////////////////
-#define GSM_MODEM_UBLOX             true
-#define GSM_MODEM_SARAR4            false
-
-//////////////////////////////////////////////
-// Not supported yet
-#define GSM_MODEM_SIM800            false
-#define GSM_MODEM_SIM808            false
-#define GSM_MODEM_SIM868            false
-#define GSM_MODEM_SIM900            false
-#define GSM_MODEM_SIM5300           false
-#define GSM_MODEM_SIM5320           false
-#define GSM_MODEM_SIM5360           false
-#define GSM_MODEM_SIM7000           false
-#define GSM_MODEM_SIM7100           false
-#define GSM_MODEM_SIM7500           false
-#define GSM_MODEM_SIM7600           false
-#define GSM_MODEM_SIM7800           false
-#define GSM_MODEM_M95               false
-#define GSM_MODEM_BG96              false
-#define GSM_MODEM_A6                false
-#define GSM_MODEM_A7                false
-#define GSM_MODEM_M590              false
-#define GSM_MODEM_MC60              false
-#define GSM_MODEM_MC60E             false
-#define GSM_MODEM_XBEE              false
-#define GSM_MODEM_SEQUANS_MONARCH   false
 ```
 
 The unselected module `#define` can be deleted or left as is (`false`)
@@ -1683,7 +1737,7 @@ Remember to connect the board and modem correspondingly.
 
 #### 3. How to select extra pins to control GSM module
 
-For example, the **u-blox SARA U201** requires a **reset pin** and **another pin to control the low-power mode**.
+For example, the **u-blox SARA U201 and LARA R2xx** require a **reset pin** and **another pin to control the low-power mode**.
 Those pins are named here in this library as `GSM_RESETN` and `GSM_DTR`.
 
 Default `GSM_RESETN` pin is set as 10, and `GSM_DTR` as 11. You can override the default pin settings in the sketch as follows:
@@ -1957,7 +2011,35 @@ void loop()
 
 //////////////////////////////////////////////
 
-#if !defined(ARDUINO_SAMD_MKRGSM1400)
+#if defined(ARDUINO_SAMD_MKRGSM1400)
+
+  // For original MKRGSM1400 => GSM_MODEM_UBLOX == true, GSM_MODEM_LARAR2 == false
+  // For modified MKRGSM1400 using LARA R2 => GSM_MODEM_UBLOX == false, GSM_MODEM_LARAR2 == true
+  #define GSM_MODEM_UBLOX                   false
+
+  #if GSM_MODEM_UBLOX
+    #define GSM_MODEM_LARAR2                false
+  #else
+    #define GSM_MODEM_LARAR2                true
+  #endif
+    
+  #define UBLOX_USING_RESET_PIN             true
+  #define UBLOX_USING_LOW_POWER_MODE        true
+
+  #if GSM_MODEM_UBLOX
+    #warning Using MKRGSM1400 Configuration with SARA U201
+  #elif GSM_MODEM_LARAR2
+    #warning Using MKRGSM1400 Configuration with LARA R2xx
+  #else
+    #error Must select either GSM_MODEM_UBLOX or GSM_MODEM_LARAR2
+  #endif
+  
+#else
+
+  // Optional usage of GSM_RESETN and GSM_DTR. Need to be here only when true. Default is false
+  #define UBLOX_USING_RESET_PIN             true
+  #define UBLOX_USING_LOW_POWER_MODE        true
+  
   // Override the default (and certainly not good) pins and port
   // Only for boards other than ARDUINO_SAMD_MKRGSM1400
   #if (ESP32)
@@ -1997,44 +2079,38 @@ void loop()
 
   #warning You must connect the Modem correctly and modify the pins / Serial port here
   
+  //////////////////////////////////////////////
+  
+  #define GSM_MODEM_UBLOX             false
+  #define GSM_MODEM_SARAR4            false
+  #define GSM_MODEM_LARAR2            true
+  
+  //////////////////////////////////////////////
+  // Not supported yet
+  #define GSM_MODEM_SIM800            false
+  #define GSM_MODEM_SIM808            false
+  #define GSM_MODEM_SIM868            false
+  #define GSM_MODEM_SIM900            false
+  #define GSM_MODEM_SIM5300           false
+  #define GSM_MODEM_SIM5320           false
+  #define GSM_MODEM_SIM5360           false
+  #define GSM_MODEM_SIM7000           false
+  #define GSM_MODEM_SIM7100           false
+  #define GSM_MODEM_SIM7500           false
+  #define GSM_MODEM_SIM7600           false
+  #define GSM_MODEM_SIM7800           false
+  #define GSM_MODEM_M95               false
+  #define GSM_MODEM_BG96              false
+  #define GSM_MODEM_A6                false
+  #define GSM_MODEM_A7                false
+  #define GSM_MODEM_M590              false
+  #define GSM_MODEM_MC60              false
+  #define GSM_MODEM_MC60E             false
+  #define GSM_MODEM_XBEE              false
+  #define GSM_MODEM_SEQUANS_MONARCH   false
+  //////////////////////////////////////////////
+
 #endif
-
-//////////////////////////////////////////////
-
-// Optional usage of GSM_RESETN and GSM_DTR. Need to be here only when true. Default is false
-
-//#define UBLOX_USING_RESET_PIN             true
-//#define UBLOX_USING_LOW_POWER_MODE        true
-
-//////////////////////////////////////////////
-
-#define GSM_MODEM_UBLOX             true
-#define GSM_MODEM_SARAR4            false
-
-//////////////////////////////////////////////
-// Not supported yet
-#define GSM_MODEM_SIM800            false
-#define GSM_MODEM_SIM808            false
-#define GSM_MODEM_SIM868            false
-#define GSM_MODEM_SIM900            false
-#define GSM_MODEM_SIM5300           false
-#define GSM_MODEM_SIM5320           false
-#define GSM_MODEM_SIM5360           false
-#define GSM_MODEM_SIM7000           false
-#define GSM_MODEM_SIM7100           false
-#define GSM_MODEM_SIM7500           false
-#define GSM_MODEM_SIM7600           false
-#define GSM_MODEM_SIM7800           false
-#define GSM_MODEM_M95               false
-#define GSM_MODEM_BG96              false
-#define GSM_MODEM_A6                false
-#define GSM_MODEM_A7                false
-#define GSM_MODEM_M590              false
-#define GSM_MODEM_MC60              false
-#define GSM_MODEM_MC60E             false
-#define GSM_MODEM_XBEE              false
-#define GSM_MODEM_SEQUANS_MONARCH   false
-//////////////////////////////////////////////
 
 // libraries
 #include <GSM_Generic_Main.h>
@@ -2054,7 +2130,7 @@ Check [**NINA B302 ACCESSING BLYNK VIA GSM - SARA G350**](https://nina-gsm.blogs
 
 ```
 Start GSM_Blynk on NINA_B302_ublox
-GSM_Generic v1.5.0
+GSM_Generic v1.6.0
 [2485] 
     ___ __ __
    / _) / / _ _____ / / __
@@ -2151,6 +2227,10 @@ Sometimes, the library will only work if you update the board core to the newer 
 
 ## Releases
 
+### Release v1.6.0
+
+1. Add support to u-blox LARA-R2xx LTE Cat 1 Modem
+
 ### Release v1.5.0
 
 1. Add support to Adafruit nRF52 core v0.22.0+
@@ -2211,7 +2291,7 @@ Submit issues to: [**GSM_Generic issues**](https://github.com/khoih-prog/GSM_Gen
 11. Add support to STM32L5 and many remaining STM32 boards with new STM32 core v2.0.0
 12. Add support to RP2040-based boards such as RASPBERRY_PI_PICO, using [**Arduino-mbed RP2040** core](https://github.com/arduino/ArduinoCore-mbed)
 13. Add support to RP2040-based boards such as RASPBERRY_PI_PICO, using [**Earle Philhower's arduino-pico** core](https://github.com/earlephilhower/arduino-pico)
-
+14. Support u-blox LARA R2xx LTE Cat 1 Modem
 
 ---
 ---
@@ -2221,12 +2301,13 @@ Submit issues to: [**GSM_Generic issues**](https://github.com/khoih-prog/GSM_Gen
 1. Based on and modified from from [Arduino **MKRGSM** library](https://github.com/arduino-libraries/MKRGSM).Thanks to the great works of these [MKRGSM Library's Contributors](https://github.com/arduino-libraries/MKRGSM/graphs/contributors)
 2. Thanks to good work of [Miguel Wisintainer](https://github.com/tcpipchip) for initiating, inspriring, working with, developing, debugging, testing and maintaining.
 3. Thanks to [avonree](https://github.com/avonree) to report bug in [SMS can send OUT but not receive #2](https://github.com/khoih-prog/GSM_Generic/issues/2) which was fixed in v1.3.0.
-
+4. Thanks to [Nino Ransenberg](https://github.com/ninora) for the enhancement request [**UBLOX LARA support** #7](https://github.com/khoih-prog/GSM_Generic/issues/7), and help testing, leading to new version v1.6.0
 
 <table>
   <tr>
     <td align="center"><a href="https://github.com/tcpipchip"><img src="https://github.com/tcpipchip.png" width="100px;" alt="tcpipchip"/><br /><sub><b>⭐️ Miguel Wisintainer</b></sub></a><br /></td>
     <td align="center"><a href="https://github.com/avonree"><img src="https://github.com/avonree.png" width="100px;" alt="avonree"/><br /><sub><b>avonree</b></sub></a><br /></td>
+    <td align="center"><a href="https://github.com/ninora"><img src="https://github.com/ninora.png" width="100px;" alt="ninora"/><br /><sub><b>Nino Ransenberg</b></sub></a><br /></td>
   </tr> 
 </table>
 

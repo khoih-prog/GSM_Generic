@@ -1,5 +1,5 @@
 /*********************************************************************************************************************************
-  Modem_UBLOX_Extra_Generic.h
+  Modem_LaraR2_Extra_Generic.h
   
   For ESP8266, ESP32, SAMD21/SAMD51, nRF52, SAM DUE, Teensy and STM32 with GSM modules
   
@@ -32,8 +32,8 @@
 
 #pragma once
 
-#ifndef _MODEM_UBLOX_EXTRA_INCLUDED_H
-#define _MODEM_UBLOX_EXTRA_INCLUDED_H
+#ifndef _MODEM_LARA_R2_EXTRA_INCLUDED_H
+#define _MODEM_LARA_R2_EXTRA_INCLUDED_H
 
 ///////////////////////////////////////////////////////////////////////
 
@@ -1370,4 +1370,4 @@ class GSMVoiceCall_ModemUrcHandler : public ModemUrcHandler
 
 ///////////////////////////////////////////////////////////////////////
 
-#endif    // _MODEM_UBLOX_EXTRA_INCLUDED_H
+#endif    // _MODEM_LARA_R2_EXTRA_INCLUDED_H
