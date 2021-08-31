@@ -103,7 +103,7 @@ class GPRS_ModemUrcHandler : public ModemUrcHandler
               
 #if ( GSM_MODEM_LARAR2 || TINY_GSM_MODEM_LARAR2 )
               // Go directly to activating IP           
-              _state = GPRS_STATE_ACTIVATE_IP
+              _state = GPRS_STATE_ACTIVATE_IP;
 #else
               _state = GPRS_STATE_SET_AUTH_MODE;
 #endif              
