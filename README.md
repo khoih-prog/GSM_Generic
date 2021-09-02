@@ -18,6 +18,7 @@
   * [To be Supported modems](#to-be-supported-modems)
   * [Currently supported Boards](#currently-supported-boards)
 * [Changelog](#changelog)
+  * [Release v1.6.1](#release-v161)
   * [Release v1.6.0](#release-v160)
   * [Release v1.5.0](#release-v150)
   * [Release v1.4.0](#release-v140)
@@ -47,6 +48,7 @@
 * [Libraries' Patches](#libraries-patches)
   * [1. For Adafruit_MQTT_Library](#1-for-adafruit_mqtt_library)
 * [HOWTO Install esp32 core for ESP32-S2 (Saola, AI-Thinker ESP-12K) and ESP32-C3 boards into Arduino IDE](#howto-install-esp32-core-for-esp32-s2-saola-ai-thinker-esp-12k-and-esp32-c3-boards-into-arduino-ide)
+  * [Important Notes](#important-notes)
   * [1. Save the original esp32 core](#1-save-the-original-esp32-core)
   * [2. Install esp32 core v1.0.6](#2-install-esp32-core-v106)
     * [2.1 Install esp32 core](#21-install-esp32-core)
@@ -242,9 +244,13 @@ This [**GSM_Generic** library](https://github.com/khoih-prog/GSM_Generic) curren
 
 ## Changelog
 
+### Release v1.6.1
+
+1. Fix GPRS issue for `u-blox LARA-R2xx LTE Cat 1` Modem
+
 ### Release v1.6.0
 
-1. Add support to u-blox LARA-R2xx LTE Cat 1 Modem
+1. Add support to `u-blox LARA-R2xx LTE Cat 1` Modem
 
 ### Release v1.5.0
 
@@ -289,11 +295,10 @@ This [**GSM_Generic** library](https://github.com/khoih-prog/GSM_Generic) curren
  6. [`Seeeduino SAMD core 1.8.1+`](https://github.com/Seeed-Studio/ArduinoCore-samd) for SAMD21/SAMD51 boards (XIAO M0, Wio Terminal, etc.). [![Latest release](https://img.shields.io/github/release/Seeed-Studio/ArduinoCore-samd.svg)](https://github.com/Seeed-Studio/ArduinoCore-samd/releases/latest/)
  7. [`Adafruit nRF52 v1.0.0+`](https://www.adafruit.com) for nRF52 boards such as Adafruit NRF52840_FEATHER, NRF52832_FEATHER, NRF52840_FEATHER_SENSE, NRF52840_ITSYBITSY, NRF52840_CIRCUITPLAY, NRF52840_CLUE, NRF52840_METRO, NRF52840_PCA10056, PARTICLE_XENON, **NINA_B302_ublox**, etc. [![GitHub release](https://img.shields.io/github/release/adafruit/Adafruit_nRF52_Arduino.svg)](https://github.com/adafruit/Adafruit_nRF52_Arduino/releases/latest)
  8. [`ESP8266 Core 3.0.2+`](https://github.com/esp8266/Arduino) for ESP8266-based boards. [![Latest release](https://img.shields.io/github/release/esp8266/Arduino.svg)](https://github.com/esp8266/Arduino/releases/latest/). To use ESP8266 core 2.7.1+ for LittleFS. 
- 9. [`ESP32 Core 1.0.6+`](https://github.com/espressif/arduino-esp32) for ESP32-based boards. [![Latest release](https://img.shields.io/github/release/espressif/arduino-esp32.svg)](https://github.com/espressif/arduino-esp32/releases/latest/)
-10. [`ESP32-S2/C3 Core 1.0.6+`](https://github.com/espressif/arduino-esp32) for ESP32-S2/C3-based boards. Must follow [HOWTO Install esp32 core for ESP32-S2 (Saola, AI-Thinker ESP-12K) and ESP32-C3 boards into Arduino IDE](#howto-install-esp32-core-for-esp32-s2-saola-ai-thinker-esp-12k-and-esp32-c3-boards-into-arduino-ide).
-11. [`Arduino Core for STM32 v2.0.0+`](https://github.com/stm32duino/Arduino_Core_STM32) for STM32 boards. [![GitHub release](https://img.shields.io/github/release/stm32duino/Arduino_Core_STM32.svg)](https://github.com/stm32duino/Arduino_Core_STM32/releases/latest)
-12. [`Arduino mbed_rp2040 core 2.4.1+`](https://github.com/arduino/ArduinoCore-mbed) for Arduino (Use Arduino Board Manager) RP2040-based boards, such as RASPBERRY_PI_PICO. [![GitHub release](https://img.shields.io/github/release/arduino/ArduinoCore-mbed.svg)](https://github.com/arduino/ArduinoCore-mbed/releases/latest)
-13. [`Earle Philhower's arduino-pico core v1.9.4+`](https://github.com/earlephilhower/arduino-pico) for RP2040-based boards such as **RASPBERRY_PI_PICO, ADAFRUIT_FEATHER_RP2040 and GENERIC_RP2040**, etc. [![GitHub release](https://img.shields.io/github/release/earlephilhower/arduino-pico.svg)](https://github.com/earlephilhower/arduino-pico/releases/latest)
+ 9. [`ESP32 core v2.0.0+`](https://github.com/espressif/arduino-esp32/releases/tag/2.0.0) for ESP32, ESP32_S2/C3-based boards.
+10. [`Arduino Core for STM32 v2.0.0+`](https://github.com/stm32duino/Arduino_Core_STM32) for STM32 boards. [![GitHub release](https://img.shields.io/github/release/stm32duino/Arduino_Core_STM32.svg)](https://github.com/stm32duino/Arduino_Core_STM32/releases/latest)
+11. [`Arduino mbed_rp2040 core 2.4.1+`](https://github.com/arduino/ArduinoCore-mbed) for Arduino (Use Arduino Board Manager) RP2040-based boards, such as RASPBERRY_PI_PICO. [![GitHub release](https://img.shields.io/github/release/arduino/ArduinoCore-mbed.svg)](https://github.com/arduino/ArduinoCore-mbed/releases/latest)
+12. [`Earle Philhower's arduino-pico core v1.9.4+`](https://github.com/earlephilhower/arduino-pico) for RP2040-based boards such as **RASPBERRY_PI_PICO, ADAFRUIT_FEATHER_RP2040 and GENERIC_RP2040**, etc. [![GitHub release](https://img.shields.io/github/release/earlephilhower/arduino-pico.svg)](https://github.com/earlephilhower/arduino-pico/releases/latest)
 
 ---
 
@@ -421,11 +426,11 @@ Whenever the above-mentioned compiler error issue is fixed with the new Arduino 
 
 #### 5. For Adafruit SAMD boards
  
- ***To be able to automatically detect and display BOARD_NAME on Adafruit SAMD (Itsy-Bitsy M4, etc) boards***, you have to copy the file [Adafruit SAMD platform.txt](Packages_Patches/adafruit/hardware/samd/1.6.7) into Adafruit samd directory (~/.arduino15/packages/adafruit/hardware/samd/1.6.7). 
+ ***To be able to automatically detect and display BOARD_NAME on Adafruit SAMD (Itsy-Bitsy M4, etc) boards***, you have to copy the file [Adafruit SAMD platform.txt](Packages_Patches/adafruit/hardware/samd/1.7.5) into Adafruit samd directory (~/.arduino15/packages/adafruit/hardware/samd/1.7.5). 
 
-Supposing the Adafruit SAMD core version is 1.6.7. This file must be copied into the directory:
+Supposing the Adafruit SAMD core version is 1.7.5. This file must be copied into the directory:
 
-- `~/.arduino15/packages/adafruit/hardware/samd/1.6.7/platform.txt`
+- `~/.arduino15/packages/adafruit/hardware/samd/1.7.5/platform.txt`
 
 Whenever a new version is installed, remember to copy this file into the new version directory. For example, new version is x.yy.zz
 This file must be copied into the directory:
@@ -531,6 +536,12 @@ To avoid `dtostrf` compile error in some MQTT-related examples, fix the [`Adafru
 ---
 
 ## HOWTO Install esp32 core for ESP32-S2 (Saola, AI-Thinker ESP-12K) and ESP32-C3 boards into Arduino IDE
+
+### Important Notes
+
+You don't need to use these following steps for new [`ESP32 core v2.0.0+`](https://github.com/espressif/arduino-esp32/releases/tag/2.0.0), which can be used for all ESP32, ESP32-S2 and ESP32-C3 and be installed from `Arduino IDE`
+
+---
 
 
 These are instructions demonstrating the steps to install esp32-s2/c3 core on Ubuntu machines. For Windows or other OS'es, just follow the the similar principles and steps.
@@ -2130,7 +2141,7 @@ Check [**NINA B302 ACCESSING BLYNK VIA GSM - SARA G350**](https://nina-gsm.blogs
 
 ```
 Start GSM_Blynk on NINA_B302_ublox
-GSM_Generic v1.6.0
+GSM_Generic v1.6.1
 [2485] 
     ___ __ __
    / _) / / _ _____ / / __
@@ -2227,9 +2238,13 @@ Sometimes, the library will only work if you update the board core to the newer 
 
 ## Releases
 
+### Release v1.6.1
+
+1. Fix GPRS issue for `u-blox LARA-R2xx LTE Cat 1` Modem
+
 ### Release v1.6.0
 
-1. Add support to u-blox LARA-R2xx LTE Cat 1 Modem
+1. Add support to `u-blox LARA-R2xx LTE Cat 1` Modem
 
 ### Release v1.5.0
 
@@ -2291,7 +2306,7 @@ Submit issues to: [**GSM_Generic issues**](https://github.com/khoih-prog/GSM_Gen
 11. Add support to STM32L5 and many remaining STM32 boards with new STM32 core v2.0.0
 12. Add support to RP2040-based boards such as RASPBERRY_PI_PICO, using [**Arduino-mbed RP2040** core](https://github.com/arduino/ArduinoCore-mbed)
 13. Add support to RP2040-based boards such as RASPBERRY_PI_PICO, using [**Earle Philhower's arduino-pico** core](https://github.com/earlephilhower/arduino-pico)
-14. Support u-blox LARA R2xx LTE Cat 1 Modem
+14. Support `u-blox LARA R2xx LTE Cat 1` Modem
 
 ---
 ---
@@ -2301,7 +2316,7 @@ Submit issues to: [**GSM_Generic issues**](https://github.com/khoih-prog/GSM_Gen
 1. Based on and modified from from [Arduino **MKRGSM** library](https://github.com/arduino-libraries/MKRGSM).Thanks to the great works of these [MKRGSM Library's Contributors](https://github.com/arduino-libraries/MKRGSM/graphs/contributors)
 2. Thanks to good work of [Miguel Wisintainer](https://github.com/tcpipchip) for initiating, inspriring, working with, developing, debugging, testing and maintaining.
 3. Thanks to [avonree](https://github.com/avonree) to report bug in [SMS can send OUT but not receive #2](https://github.com/khoih-prog/GSM_Generic/issues/2) which was fixed in v1.3.0.
-4. Thanks to [Nino Ransenberg](https://github.com/ninora) for the enhancement request [**UBLOX LARA support** #7](https://github.com/khoih-prog/GSM_Generic/issues/7), and help testing, leading to new version v1.6.0
+4. Thanks to [Nino Ransenberg](https://github.com/ninora) for the enhancement request [**UBLOX LARA support** #7](https://github.com/khoih-prog/GSM_Generic/issues/7), and help testing, leading to new version v1.6.0 and v1.6.1
 
 <table>
   <tr>

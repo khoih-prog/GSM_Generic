@@ -15,7 +15,7 @@ If you don't find anything, please [open a new issue](https://github.com/khoih-p
 Please ensure to specify the following:
 
 * Arduino IDE version (e.g. 1.8.15) or Platform.io version
-* `ESP8266`,`ESP32` or `STM32` Core Version (e.g. ESP8266 core v3.0.2, ESP32 v1.0.6 or STM32 v2.0.0)
+* `SAMD`, `ESP32` or `nRF52` Core Version (e.g. Arduino SAMD core v1.8.11, Adafruit SAMD core v1.7.5, ESP32 v2.0.0 or nRF52 v1.0.0)
 * Contextual information (e.g. what you were trying to achieve)
 * Simplest possible steps to reproduce
 * Anything that might be relevant in your opinion, such as:
