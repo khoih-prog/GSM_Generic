@@ -19,42 +19,31 @@
 */
 
 #include "variant.h"
-
 #include "wiring_constants.h"
 #include "wiring_digital.h"
 #include "nrf.h"
 
-//https://www.u-blox.com/sites/default/files/NINA-B1_DataSheet_UBX-15019243.pdf
-//https://www.u-blox.com/sites/default/files/EVK-NINA-B1_UserGuide_%28UBX-15028120%29_C1-Public.pdf
-
 const uint32_t g_ADigitalPinMap[] =
 {
-	// D0 .. D13
-	5,   // D0  is P0.05 (UART RX)
-	6,   // D1  is P0.06 (UART TX)
-	7,   // D2  is P0.07
-	31,  // D3  is P0.31
-	18,  // D4  is P0.18 (LED Blue)
-	99,  // D5  (NC)
-	9,   // D6  is P0.09 NFC1
-	10,  // D7  is P0.10 (Button) NFC2
-	99,  // D8  (NC)
-	8,   // D9  is P0.08
-	11,  // D10 is P0.11 CS
-	13,  // D11 is P0.13 MOSI
-	12,  // D12 is P0.12 MISO
-	14,  // D13 is P0.14 SCK
-	//I2C
-	2,  // D14 is P0.2 (SDA)
-	3,  // D15 is P0.3 (SCL)
-	// D16 .. D21 (aka A0 .. A5)
-	3,  // D16 is P0.03 (A0)
-	2,  // D17 is P0.02 (A1)
-	4,  // D18 is P0.04 (A2)
-	30, // D19 is P0.30 (A3) SW2
-	29, // D20 is P0.29 (A4)
-	28, // D21 is P0.28 (A5)
-	9,  // P0.09 NFC
-	10, // P0.10 NFC
-	16, // SW1 (LED Green)
+	// P0
+	0, 1, 2, 3, 4, 5, 6, 7,
+	8, 9, 10, 11, 12, 13, 14, 15,
+	16, 17, 18, 19, 20, 21, 22, 23,
+	24, 25, 26, 27, 28, 29, 30, 31,
+
+	// P1
+	32, 33, 34, 35, 36, 37, 38, 39,
+	40, 41, 42, 43, 44, 45, 46, 47,
+	48, 49, 50, 51, 52, 53, 54, 55,
+	56, 57, 58, 59, 60, 61, 62, 63
 };
+void initVariant()
+{
+	// LED1 & LED2
+	pinMode(PIN_LED1, OUTPUT);
+	ledOff(PIN_LED1);
+
+	pinMode(PIN_LED2, OUTPUT);
+	ledOff(PIN_LED2);
+}
+

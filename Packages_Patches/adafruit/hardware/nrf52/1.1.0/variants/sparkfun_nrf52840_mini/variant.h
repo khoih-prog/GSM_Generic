@@ -16,11 +16,8 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-// Thanks to great work of [Miguel Alexandre Wisintainer](https://github.com/tcpipchip).
-// See [u-blox nina b](https://github.com/khoih-prog/WiFiNINA_Generic/issues/1)
-
-#ifndef _VARIANT_NINA_B302_UBLOX_
-#define _VARIANT_NINA_B302_UBLOX_
+#ifndef _VARIANT_SPARKFUN52840MINI_
+#define _VARIANT_SPARKFUN52840MINI_
 
 /** Master clock frequency */
 #define VARIANT_MCK       (64000000ul)
@@ -38,53 +35,44 @@
 extern "C"
 {
 #endif // __cplusplus
+
 // Number of pins defined in PinDescription array
-#define PINS_COUNT           (40)
-#define NUM_DIGITAL_PINS     (34)
-#define NUM_ANALOG_INPUTS    (6)
+#define PINS_COUNT           (64)
+#define NUM_DIGITAL_PINS     (64)
+#define NUM_ANALOG_INPUTS    (8)
 #define NUM_ANALOG_OUTPUTS   (0)
 
 // LEDs
-#define PIN_LED1             (3)
-#define PIN_LED2             (4)
+#define PIN_LED1             (7)
+#define PIN_LED2             (14)
 
 #define LED_BUILTIN          PIN_LED1
 #define LED_CONN             PIN_LED2
 
-#define LED_RED              PIN_LED1
-#define LED_BLUE             PIN_LED2
+#define LED_BLUE             PIN_LED1
+#define LED_RED              PIN_LED2
 
 #define LED_STATE_ON         1         // State when LED is litted
 
+// Buttons
 /*
-   Buttons
+  #define PIN_BUTTON1             (2)
+  #define PIN_BUTTON2             (3)
+  #define PIN_BUTTON3             (4)
+  #define PIN_BUTTON4             (5)
 */
-#define PIN_BUTTON1             (7)
 
 /*
    Analog pins
 */
-#define PIN_A0               (14)
-#define PIN_A1               (15)
-#define PIN_A2               (16)
-#define PIN_A3               (17)
-#define PIN_A4               (18)
-#define PIN_A5               (19)
-
-#define D0                   (0)
-#define D1                   (1)
-#define D2                   (2)
-#define D3                   (3)
-#define D4                   (4)
-#define D5                   (5)
-#define D6                   (6)
-#define D7                   (7)
-#define D8                   (8)
-#define D9                   (9)
-#define D10                  (10)
-#define D11                  (11)
-#define D12                  (12)
-#define D13                  (13)
+#define PIN_A0               (2)
+#define PIN_A1               (3)
+#define PIN_A2               (4)
+#define PIN_A3               (5)
+#define PIN_A4               (28)
+#define PIN_A5               (29)
+#define PIN_A6               (30)
+#define PIN_A7               (31)
 
 static const uint8_t A0  = PIN_A0 ;
 static const uint8_t A1  = PIN_A1 ;
@@ -92,51 +80,66 @@ static const uint8_t A2  = PIN_A2 ;
 static const uint8_t A3  = PIN_A3 ;
 static const uint8_t A4  = PIN_A4 ;
 static const uint8_t A5  = PIN_A5 ;
-
+static const uint8_t A6  = PIN_A6 ;
+static const uint8_t A7  = PIN_A7 ;
 #define ADC_RESOLUTION    14
 
-#define PIN_NFC1           (31)
-#define PIN_NFC2           (2)
+// Other pins
+#define PIN_AREF           (2)
+#define PIN_DFU            (13)
+#define PIN_NFC1           (9)
+#define PIN_NFC2           (10)
+
+static const uint8_t AREF = PIN_AREF;
 
 /*
    Serial interfaces
 */
-#define PIN_SERIAL1_RX       (0)
-#define PIN_SERIAL1_TX       (1)
+// Serial
+//Previous Hardware UART definition for nRF52 Arduino Core, below 0.16.0
+//Feel free to comment out these two lines below if there are conflicts with latest release
+#define PIN_SERIAL_RX       (15)
+#define PIN_SERIAL_TX       (17)
+
+//Hardware UART definition for nRF52 Arduino Core, 0.17.0 and above
+#define PIN_SERIAL1_RX      (15)
+#define PIN_SERIAL1_TX      (17)
 
 /*
    SPI Interfaces
 */
 #define SPI_INTERFACES_COUNT 1
 
-#define PIN_SPI_MISO         (22)    //24 original
-#define PIN_SPI_MOSI         (23)    //25 original
-#define PIN_SPI_SCK          (24)    //26 original
+#define PIN_SPI_MISO         (31)
+#define PIN_SPI_MOSI         (3)
+#define PIN_SPI_SCK          (30)
 
-static const uint8_t SS   = (13);
-static const uint8_t MOSI = PIN_SPI_MOSI;
-static const uint8_t MISO = PIN_SPI_MISO;
-static const uint8_t SCK  = PIN_SPI_SCK;
+static const uint8_t SS   = 2 ;
+static const uint8_t MOSI = PIN_SPI_MOSI ;
+static const uint8_t MISO = PIN_SPI_MISO ;
+static const uint8_t SCK  = PIN_SPI_SCK ;
 
 /*
    Wire Interfaces
 */
 #define WIRE_INTERFACES_COUNT 1
 
-#define PIN_WIRE_SDA         (20)
-#define PIN_WIRE_SCL         (21)
+#define PIN_WIRE_SDA         (8)
+#define PIN_WIRE_SCL         (11)
 
-// QSPI Pins
-#define PIN_QSPI_SCK         22
-#define PIN_QSPI_CS          23
-#define PIN_QSPI_IO0         24
-#define PIN_QSPI_IO1         25
-#define PIN_QSPI_IO2         26
-#define PIN_QSPI_IO3         27
+/*
+   QSPI interface for external flash
+*/
+#define PIN_QSPI_SCK         32
+#define PIN_QSPI_CS          33
+#define PIN_QSPI_DATA0       34
+#define PIN_QSPI_DATA1       35
+#define PIN_QSPI_DATA2       36
+#define PIN_QSPI_DATA3       37
 
 // On-board QSPI Flash
+// If EXTERNAL_FLASH_DEVICES is not defined, all supported devices will be used
 #define EXTERNAL_FLASH_DEVICES   GD25Q16C
-#define EXTERNAL_FLASH_USE_QSPI
 
 #ifdef __cplusplus
 }
@@ -146,4 +149,4 @@ static const uint8_t SCK  = PIN_SPI_SCK;
           Arduino objects - C++ only
   ----------------------------------------------------------------------------*/
 
-#endif    //_VARIANT_NINA_B302_UBLOX_
+#endif
