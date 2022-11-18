@@ -154,7 +154,7 @@ This library is based on, modified, bug-fixed and improved from:
 
 to add support to many boards besides `Arduino MKR GSM 1400`.
 
-This [GSM_Generic library](https://github.com/khoih-prog/GSM_Generic) will finally provide these following features (certainly ony if supported by the GSM/GPRS modules)
+This [GSM_Generic library](https://github.com/khoih-prog/GSM_Generic) will finally provide these following features (certainly only if supported by the GSM/GPRS modules)
 
 1. **TCP Client and Server** (HTTP, **HTTPS**, MQTT, **MQTTS**, Blynk, WebSockets, ...)
 2. **UDP** data connections
@@ -468,7 +468,7 @@ Supposing the STM32 stm32 core version is 1.9.0. These files must be copied into
 - `~/.arduino15/packages/STM32/hardware/stm32/1.9.0/system/STM32F7xx/stm32f7xx_hal_conf_default.h` for Nucleo-144 STM32F7.
 
 Whenever a new version is installed, remember to copy this file into the new version directory. For example, new version is x.yy.zz,
-theses files must be copied into the corresponding directory:
+these files must be copied into the corresponding directory:
 
 - `~/.arduino15/packages/STM32/hardware/stm32/x.yy.zz/system/STM32F4xx/stm32f4xx_hal_conf_default.h`
 - `~/.arduino15/packages/STM32/hardware/stm32/x.yy.zz/system/STM32F7xx/stm32f7xx_hal_conf_default.h
@@ -484,7 +484,7 @@ Supposing the STM32 stm32 core version is 1.9.0. These files must be copied into
 - `~/.arduino15/packages/STM32/hardware/stm32/1.9.0/variants/NUCLEO_L053R8/variant.h` for Nucleo-64 NUCLEO_L053R8.
 
 Whenever a new version is installed, remember to copy this file into the new version directory. For example, new version is x.yy.zz,
-theses files must be copied into the corresponding directory:
+these files must be copied into the corresponding directory:
 
 - `~/.arduino15/packages/STM32/hardware/stm32/x.yy.zz/variants/NUCLEO_F767ZI/variant.h`
 - `~/.arduino15/packages/STM32/hardware/stm32/x.yy.zz/variants/NUCLEO_L053R8/variant.h`
@@ -797,7 +797,7 @@ GSM(bool debug = false);
                        start-up. If it is running, it will restart. Takes up to 10
                        seconds
     @param synchronous If TRUE the call only returns after the Start is complete
-                       or fails. If FALSE the call will return inmediately. You have
+                       or fails. If FALSE the call will return immediately. You have
                        to call repeatedly ready() until you get a result. Default is TRUE.
     @return If synchronous, GSM3_NetworkStatus_t. If asynchronous, returns 0.
 */
@@ -901,7 +901,7 @@ int hangCall();
     @param buffer     pointer to the buffer memory
     @param bufsize    size of available memory area, at least should be 10 characters
     @return In asynchronous mode returns 0 if last command is still executing, 1 success, >1 error
-            In synchronous mode returns 1 if the number is correcty taken 0 if not
+            In synchronous mode returns 1 if the number is correctly taken 0 if not
 */
 int retrieveCallingNumber(char* buffer, int bufsize);
 
@@ -985,7 +985,7 @@ int read();
 */
 int peek();
 
-/** Delete the SMS from Modem memory and proccess answer
+/** Delete the SMS from Modem memory and process answer
 */
 void flush();
 ```
@@ -1739,7 +1739,7 @@ For example
 
 #### 2. How to select which Serial port to communicate to GSM module
 
-Select the corresponding `Serial` port to use to communicate (sending AT conmmands and receiving responces) to GSM module
+Select the corresponding `Serial` port to use to communicate (sending AT conmmands and receiving responses) to GSM module
 Remember to connect the board and modem correspondingly.
 
 ```cpp
